@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Project, ContactForm, ContactMessage, VisitorStats, Profile } from '../types';
+import type { Project, ContactForm, ContactMessage, VisitorStats, Profile, BlogPost } from '../types';
 
 const api = axios.create({ baseURL: '/api' });
 
@@ -11,6 +11,7 @@ api.interceptors.request.use((config) => {
 
 export const projectsApi = {
   list: () => api.get<Project[]>('/projects').then(r => r.data),
+  get: (id: number) => api.get<Project>(`/projects/${id}`).then(r => r.data),
   create: (data: Omit<Project, 'id' | 'created_at'>) => api.post<Project>('/projects', data).then(r => r.data),
   update: (id: number, data: Partial<Project>) => api.put<Project>(`/projects/${id}`, data).then(r => r.data),
   delete: (id: number) => api.delete(`/projects/${id}`),
@@ -35,6 +36,15 @@ export const authApi = {
 export const profileApi = {
   get: () => api.get<Profile>('/profile').then(r => r.data),
   update: (data: Profile) => api.put<Profile>('/profile', data).then(r => r.data),
+};
+
+export const blogApi = {
+  list: () => api.get<BlogPost[]>('/blog').then(r => r.data),
+  listAll: () => api.get<BlogPost[]>('/blog/all').then(r => r.data),
+  get: (slug: string) => api.get<BlogPost>(`/blog/${slug}`).then(r => r.data),
+  create: (data: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) => api.post<BlogPost>('/blog', data).then(r => r.data),
+  update: (id: number, data: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) => api.put<BlogPost>(`/blog/${id}`, data).then(r => r.data),
+  delete: (id: number) => api.delete(`/blog/${id}`),
 };
 
 export const uploadsApi = {

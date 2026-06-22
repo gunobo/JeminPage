@@ -1,15 +1,16 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { projectsApi } from '../api';
+import { useLang } from '../context/LanguageContext';
 import type { Project } from '../types';
 
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const { t } = useLang();
 
   useEffect(() => {
-    projectsApi.list()
-      .then(setProjects)
-      .finally(() => setLoading(false));
+    projectsApi.list().then(setProjects).finally(() => setLoading(false));
   }, []);
 
   return (
@@ -17,7 +18,7 @@ export default function Projects() {
       <div className="px-6 md:px-12 pt-32 pb-16 max-w-7xl mx-auto">
         <div className="border-b border-white/10 pb-12 mb-16">
           <span className="text-xs font-semibold tracking-[0.3em] text-white/30 uppercase">Portfolio</span>
-          <h1 className="font-black text-[10vw] tracking-tighter leading-none mt-2">Projects</h1>
+          <h1 className="font-black text-[10vw] tracking-tighter leading-none mt-2">{t('projects')}</h1>
         </div>
 
         {loading ? (
@@ -25,21 +26,15 @@ export default function Projects() {
             <div className="w-6 h-6 border border-white/20 border-t-white rounded-full animate-spin" />
           </div>
         ) : projects.length === 0 ? (
-          <div className="text-center py-32 text-white/20 text-sm uppercase tracking-widest">
-            No projects yet.
-          </div>
+          <div className="text-center py-32 text-white/20 text-sm uppercase tracking-widest">No projects yet.</div>
         ) : (
           <div className="space-y-px bg-white/10">
             {projects.map((project, i) => (
               <div key={project.id} className="group bg-[#0a0a0a] grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-0">
-                {/* Thumbnail */}
                 <div className="overflow-hidden h-60 md:h-auto">
                   {project.thumbnail_url ? (
-                    <img
-                      src={project.thumbnail_url}
-                      alt={project.title}
-                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-                    />
+                    <img src={project.thumbnail_url} alt={project.title}
+                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" />
                   ) : (
                     <div className="w-full h-full bg-white/5 flex items-center justify-center min-h-[200px]">
                       <span className="text-7xl font-black text-white/10">{String(i + 1).padStart(2, '0')}</span>
@@ -47,40 +42,37 @@ export default function Projects() {
                   )}
                 </div>
 
-                {/* Info */}
                 <div className="p-8 md:p-12 flex flex-col justify-between">
                   <div>
                     <div className="flex items-center justify-between mb-6">
-                      <span className="text-xs font-semibold tracking-widest text-white/20 uppercase">
-                        {String(i + 1).padStart(2, '0')}
-                      </span>
+                      <span className="text-xs font-semibold tracking-widest text-white/20 uppercase">{String(i + 1).padStart(2, '0')}</span>
                       {project.is_featured && (
-                        <span className="text-xs font-semibold tracking-widest text-white/30 uppercase border border-white/10 px-3 py-1">
-                          Featured
-                        </span>
+                        <span className="text-xs font-semibold tracking-widest text-white/30 uppercase border border-white/10 px-3 py-1">{t('featured')}</span>
                       )}
                     </div>
                     <h2 className="font-black text-3xl md:text-4xl tracking-tight mb-4">{project.title}</h2>
-                    <p className="text-white/40 leading-relaxed mb-8">{project.description}</p>
+                    <p className="text-white/40 leading-relaxed mb-8 line-clamp-3">{project.description}</p>
                     <div className="flex flex-wrap gap-2">
                       {project.tech_stack.map(tech => (
-                        <span key={tech} className="text-xs px-3 py-1 border border-white/10 text-white/30">
-                          {tech}
-                        </span>
+                        <span key={tech} className="text-xs px-3 py-1 border border-white/10 text-white/30">{tech}</span>
                       ))}
                     </div>
                   </div>
                   <div className="flex gap-6 mt-8 pt-8 border-t border-white/10">
+                    <Link to={`/projects/${project.id}`}
+                      className="text-xs font-semibold uppercase tracking-widest text-white hover:text-white/60 transition-colors">
+                      {t('viewProject')}
+                    </Link>
                     {project.github_url && (
                       <a href={project.github_url} target="_blank" rel="noreferrer"
                         className="text-xs font-semibold uppercase tracking-widest text-white/40 hover:text-white transition-colors">
-                        GitHub ↗
+                        {t('github')} ↗
                       </a>
                     )}
                     {project.demo_url && (
                       <a href={project.demo_url} target="_blank" rel="noreferrer"
-                        className="text-xs font-semibold uppercase tracking-widest text-white hover:text-white/60 transition-colors">
-                        Live Demo ↗
+                        className="text-xs font-semibold uppercase tracking-widest text-white/40 hover:text-white transition-colors">
+                        {t('live')} ↗
                       </a>
                     )}
                   </div>

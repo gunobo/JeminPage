@@ -35,6 +35,19 @@ export interface SkillGroup {
   skills: string[];
 }
 
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  content: string;
+  excerpt?: string;
+  tags: string[];
+  thumbnail_url?: string;
+  is_published: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface Profile {
   name: string;
   tagline: string;

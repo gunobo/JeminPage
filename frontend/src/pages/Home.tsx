@@ -136,11 +136,15 @@ export default function Home() {
             <p className="text-white/40 text-base md:text-lg max-w-sm leading-relaxed">
               {profile?.bio || '개발자이자 디자이너로서\n창의적인 디지털 경험을 만듭니다.'}
             </p>
-            <div className="flex gap-6 items-center">
+            <div className="flex gap-6 items-center flex-wrap">
               <Link to="/projects"
                 className="group flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white border border-white/20 px-7 py-4 hover:bg-white hover:text-black transition-all duration-300">
                 Projects <span className="group-hover:translate-x-1 transition-transform">→</span>
               </Link>
+              <a href="/cv.pdf" download
+                className="text-xs font-semibold uppercase tracking-[0.2em] text-white/30 hover:text-white transition-colors">
+                CV ↓
+              </a>
               <Link to="/contact"
                 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/30 hover:text-white transition-colors">
                 Contact

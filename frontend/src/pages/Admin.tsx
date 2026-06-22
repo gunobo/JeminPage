@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { projectsApi, authApi, statsApi, contactApi, profileApi } from '../api';
+import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi } from '../api';
 import ImageUpload from '../components/ui/ImageUpload';
-import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup } from '../types';
+import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost } from '../types';
 
 const inputCls = 'w-full bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 focus:outline-none focus:border-white/30 transition-colors text-sm';
 const btnPrimary = 'px-6 py-3 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-white/80 transition-colors';
@@ -375,9 +375,143 @@ function ProfileTab() {
   );
 }
 
+// ─── Blog tab ─────────────────────────────────────────────────────────────────
+
+const EMPTY_POST = { title: '', slug: '', content: '', excerpt: '', tags: [] as string[], thumbnail_url: '', is_published: false };
+
+function BlogTab() {
+  const [posts, setPosts] = useState<BlogPost[]>([]);
+  const [form, setForm] = useState(EMPTY_POST);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [tagInput, setTagInput] = useState('');
+
+  const refresh = () => blogApi.listAll().then(setPosts);
+  useEffect(() => { refresh(); }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingId) await blogApi.update(editingId, form);
+    else await blogApi.create(form);
+    setForm(EMPTY_POST); setEditingId(null); refresh();
+  };
+
+  const handleEdit = (p: BlogPost) => {
+    setEditingId(p.id);
+    setForm({ title: p.title, slug: p.slug, content: p.content, excerpt: p.excerpt || '',
+      tags: p.tags, thumbnail_url: p.thumbnail_url || '', is_published: p.is_published });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('삭제하시겠습니까?')) return;
+    await blogApi.delete(id); refresh();
+  };
+
+  const addTag = () => {
+    const t = tagInput.trim();
+    if (t && !form.tags.includes(t)) setForm({ ...form, tags: [...form.tags, t] });
+    setTagInput('');
+  };
+
+  const autoSlug = (title: string) =>
+    title.toLowerCase().replace(/[^a-z0-9가-힣\s]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+
+  return (
+    <div className="space-y-6">
+      <div className="border border-white/10 p-8">
+        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-6">
+          {editingId ? 'Edit Post' : 'New Post'}
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input required value={form.title}
+            onChange={e => setForm({ ...form, title: e.target.value, slug: editingId ? form.slug : autoSlug(e.target.value) })}
+            placeholder="Title" className={inputCls} />
+          <input required value={form.slug}
+            onChange={e => setForm({ ...form, slug: e.target.value })}
+            placeholder="Slug (URL)" className={inputCls} />
+          <input value={form.excerpt}
+            onChange={e => setForm({ ...form, excerpt: e.target.value })}
+            placeholder="Excerpt (optional)" className={inputCls} />
+
+          <div className="flex gap-2">
+            <input value={tagInput}
+              onChange={e => setTagInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())}
+              placeholder="Tags (Enter to add)" className={`${inputCls} flex-1`} />
+            <button type="button" onClick={addTag}
+              className="border border-white/10 text-white/40 px-4 hover:border-white/30 hover:text-white transition-colors">+</button>
+          </div>
+          {form.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {form.tags.map((t, i) => (
+                <span key={i} className="text-xs px-3 py-1 border border-white/10 text-white/40 flex items-center gap-2">
+                  {t}
+                  <button type="button" onClick={() => setForm({ ...form, tags: form.tags.filter((_, j) => j !== i) })}
+                    className="text-white/20 hover:text-red-400">×</button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          <textarea required rows={16} value={form.content}
+            onChange={e => setForm({ ...form, content: e.target.value })}
+            placeholder={'# 제목\n\n## 소제목\n\n내용을 입력하세요...\n\n- 항목 1\n- 항목 2'}
+            className={`${inputCls} resize-y font-mono text-xs leading-relaxed`} />
+
+          <label className="flex items-center gap-3 cursor-pointer group">
+            <div className={`w-10 h-5 rounded-full transition-colors relative ${form.is_published ? 'bg-white' : 'bg-white/10'}`}
+              onClick={() => setForm({ ...form, is_published: !form.is_published })}>
+              <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-black transition-transform ${form.is_published ? 'translate-x-5' : 'translate-x-0.5'}`} />
+            </div>
+            <span className="text-sm text-white/40 group-hover:text-white/60 transition-colors">Published</span>
+          </label>
+
+          <div className="flex gap-3 pt-2">
+            <button type="submit" className={btnPrimary}>{editingId ? 'Update' : 'Publish'}</button>
+            {editingId && (
+              <button type="button" onClick={() => { setEditingId(null); setForm(EMPTY_POST); }} className={btnSecondary}>Cancel</button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div className="border border-white/10 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="border-b border-white/10">
+            <tr>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">Title</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden sm:table-cell">Tags</th>
+              <th className="px-4 py-3 text-center text-[11px] font-semibold tracking-widest text-white/20 uppercase">Pub</th>
+              <th className="px-4 py-3 text-right text-[11px] font-semibold tracking-widest text-white/20 uppercase">Actions</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {posts.map(p => (
+              <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
+                <td className="px-4 py-3 font-medium text-white/70">{p.title}</td>
+                <td className="px-4 py-3 text-white/30 hidden sm:table-cell text-xs">{p.tags.join(', ')}</td>
+                <td className="px-4 py-3 text-center text-white/40">{p.is_published ? '✓' : ''}</td>
+                <td className="px-4 py-3 text-right whitespace-nowrap">
+                  <button onClick={() => handleEdit(p)}
+                    className="text-xs text-white/30 hover:text-white transition-colors mr-4 uppercase tracking-widest">Edit</button>
+                  <button onClick={() => handleDelete(p.id)}
+                    className="text-xs text-red-400/50 hover:text-red-400 transition-colors uppercase tracking-widest">Del</button>
+                </td>
+              </tr>
+            ))}
+            {posts.length === 0 && (
+              <tr><td colSpan={4} className="px-6 py-12 text-center text-white/20 text-xs uppercase tracking-widest">No posts yet.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-type Tab = 'projects' | 'messages' | 'profile';
+type Tab = 'projects' | 'messages' | 'profile' | 'blog';
 
 export default function Admin() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
@@ -423,7 +557,7 @@ export default function Admin() {
 
         {/* Tabs */}
         <div className="flex gap-0 mb-8 border-b border-white/10">
-          {([['profile', 'Profile'], ['projects', 'Projects'], ['messages', 'Messages']] as [Tab, string][]).map(([t, label]) => (
+          {([['profile', 'Profile'], ['projects', 'Projects'], ['blog', 'Blog'], ['messages', 'Messages']] as [Tab, string][]).map(([t, label]) => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-6 py-3 text-xs font-black uppercase tracking-widest border-b-2 -mb-px transition-colors ${
                 tab === t ? 'border-white text-white' : 'border-transparent text-white/20 hover:text-white/50'
@@ -435,6 +569,7 @@ export default function Admin() {
 
         {tab === 'profile' && <ProfileTab />}
         {tab === 'projects' && <ProjectsTab />}
+        {tab === 'blog' && <BlogTab />}
         {tab === 'messages' && <MessagesTab />}
       </div>
     </main>
