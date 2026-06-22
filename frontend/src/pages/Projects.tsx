@@ -42,16 +42,12 @@ export default function Projects() {
                         style={{ transform: i % 2 === 0 ? 'rotate(-2deg)' : 'rotate(2deg)', filter: 'drop-shadow(0 25px 40px rgba(0,0,0,0.8))' }}
                         onMouseEnter={e => (e.currentTarget.style.transform = 'rotate(0deg) scale(1.04)')}
                         onMouseLeave={e => (e.currentTarget.style.transform = i % 2 === 0 ? 'rotate(-2deg)' : 'rotate(2deg)')}>
-                        <div className="relative rounded-sm overflow-hidden ring-1 ring-white/20">
+                        <div className="rounded-sm overflow-hidden ring-1 ring-white/20">
                           <img
                             src={project.thumbnail_url}
                             alt={project.title}
-                            className="w-full transition-all duration-700 group-hover:scale-105"
-                            style={{ filter: 'grayscale(1) brightness(0.7) contrast(1.1)' }}
-                            onMouseEnter={e => ((e.target as HTMLImageElement).style.filter = 'grayscale(0) brightness(1) contrast(1)')}
-                            onMouseLeave={e => ((e.target as HTMLImageElement).style.filter = 'grayscale(1) brightness(0.7) contrast(1.1)')}
+                            className="w-full transition-all duration-500 grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100"
                           />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-70 group-hover:opacity-30 transition-opacity duration-500" />
                         </div>
                       </div>
                     </>
