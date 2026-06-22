@@ -334,7 +334,7 @@ export default function Home() {
                   <img
                     src={org.logo_url || '/favicon.svg'}
                     alt={org.name}
-                    className="w-12 h-12 object-cover rounded opacity-60 group-hover:opacity-100 transition-opacity shrink-0"
+                    className={`w-12 h-12 rounded opacity-60 group-hover:opacity-100 transition-opacity shrink-0 ${org.logo_url ? 'object-cover' : 'object-contain p-1'}`}
                   />
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
