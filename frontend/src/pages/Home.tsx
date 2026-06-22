@@ -116,8 +116,11 @@ export default function Home() {
         />
 
         {/* Top meta */}
-        <div className="relative flex justify-between items-start text-[11px] font-semibold tracking-[0.25em] text-white/20 uppercase max-w-7xl mx-auto w-full">
-          <span>Portfolio 2026</span>
+        <div className="relative flex justify-between items-start max-w-7xl mx-auto w-full">
+          <span className="text-[11px] font-semibold tracking-[0.25em] text-white/20 uppercase">Portfolio 2026</span>
+          {profile?.tagline && (
+            <span className="text-sm md:text-base font-semibold tracking-widest text-white/50 uppercase text-right">{profile.tagline}</span>
+          )}
         </div>
 
         {/* Big title */}
@@ -134,12 +137,6 @@ export default function Home() {
               : <><span className="block">Im</span><span className="block text-white/10">Jemin</span></>
             }
           </h1>
-          {profile?.tagline && (
-            <p className="mt-4 text-white/40 text-lg md:text-2xl font-medium tracking-wide"
-              style={{ transform: `translateY(${scrollY * 0.1}px)` }}>
-              {profile.tagline}
-            </p>
-          )}
           <div className="mt-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <p className="text-white/40 text-base md:text-lg max-w-sm leading-relaxed">
               {profile?.bio || '개발자이자 디자이너로서\n창의적인 디지털 경험을 만듭니다.'}
