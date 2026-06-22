@@ -8,7 +8,7 @@ def send_email(form: ContactForm):
         return
     msg = MIMEText(f"From: {form.name} <{form.email}>\n\n{form.message}")
     msg["Subject"] = f"[Portfolio] 문의: {form.name}"
-    msg["From"] = settings.SMTP_USER
+    msg["From"] = f"임제민 포트폴리오 <portfolio@imjemin.co.kr>"
     msg["To"] = settings.CONTACT_EMAIL
     with smtplib.SMTP(settings.SMTP_HOST, settings.SMTP_PORT) as s:
         s.starttls()
