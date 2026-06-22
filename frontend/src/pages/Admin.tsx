@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi } from '../api';
 import ImageUpload from '../components/ui/ImageUpload';
 import FileUpload from '../components/ui/FileUpload';
-import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost, YearlyGoal } from '../types';
+import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost } from '../types';
 
 const inputCls = 'w-full bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 focus:outline-none focus:border-white/30 transition-colors text-sm';
 const btnPrimary = 'px-6 py-3 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-white/80 transition-colors';
@@ -636,7 +636,7 @@ export default function Admin() {
 
         {/* Stats */}
         {stats && (
-          <div className="grid grid-cols-2 gap-px bg-white/5 mb-8">
+          <div className="grid grid-cols-2 gap-px bg-white/5 mb-2">
             <div className="bg-[#0a0a0a] p-6">
               <p className="font-black text-4xl">{stats.today}</p>
               <p className="text-[11px] font-semibold tracking-widest text-white/20 uppercase mt-1">오늘</p>
@@ -647,6 +647,15 @@ export default function Admin() {
             </div>
           </div>
         )}
+        <div className="flex justify-end mb-6">
+          <button onClick={async () => {
+            if (!confirm('방문자 수를 초기화하시겠습니까?')) return;
+            await statsApi.reset();
+            setStats({ today: 0, total: 0 });
+          }} className="text-[11px] text-red-400/40 hover:text-red-400 uppercase tracking-widest transition-colors">
+            방문자 초기화
+          </button>
+        </div>
 
         {/* Tabs */}
         <div className="flex gap-0 mb-8 border-b border-white/10">

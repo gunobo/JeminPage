@@ -3,7 +3,6 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from .database import Base, engine
-from .stats.service import record_visit
 from .auth.router import router as auth_router
 from .projects.router import router as projects_router
 from .contact.router import router as contact_router
@@ -17,6 +16,7 @@ from .projects import models as _pm  # noqa: F401
 from .contact import models as _cm  # noqa: F401
 from .profile import models as _prm  # noqa: F401
 from .blog import models as _bm  # noqa: F401
+from .stats import models as _sm  # noqa: F401
 
 Base.metadata.create_all(bind=engine)
 
@@ -35,14 +35,6 @@ app.add_middleware(
 
 app.mount("/static", StaticFiles(directory="/app/static"), name="static")
 
-@app.middleware("http")
-async def count_visits(request: Request, call_next):
-    if not request.url.path.startswith("/api") and not request.url.path.startswith("/static"):
-        try:
-            record_visit()
-        except Exception:
-            pass
-    return await call_next(request)
 
 app.include_router(auth_router, prefix="/api")
 app.include_router(projects_router, prefix="/api")
