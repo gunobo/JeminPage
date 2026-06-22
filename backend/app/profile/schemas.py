@@ -12,6 +12,8 @@ class ProfileOut(BaseModel):
     email: str
     portfolio_url: str
     avatar_url: str
+    cv_url: str
+    og_image_url: str
     skill_groups: list[SkillGroup]
 
     model_config = {"from_attributes": True}
@@ -24,4 +26,6 @@ class ProfileUpdate(BaseModel):
     email: str = ""
     portfolio_url: str = ""
     avatar_url: str = ""
+    cv_url: str = ""
+    og_image_url: str = ""
     skill_groups: list[SkillGroup] = []

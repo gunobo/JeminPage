@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi } from '../api';
 import ImageUpload from '../components/ui/ImageUpload';
+import FileUpload from '../components/ui/FileUpload';
 import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost } from '../types';
 
 const inputCls = 'w-full bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 focus:outline-none focus:border-white/30 transition-colors text-sm';
@@ -267,7 +268,7 @@ function MessagesTab() {
 
 const EMPTY_PROFILE: Profile = {
   name: '', tagline: '', bio: '', github_url: '', email: '',
-  portfolio_url: '', avatar_url: '', skill_groups: [],
+  portfolio_url: '', avatar_url: '', cv_url: '', og_image_url: '', skill_groups: [],
 };
 
 function ProfileTab() {
@@ -324,6 +325,25 @@ function ProfileTab() {
         <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-6">Profile Photo</p>
         <div className="max-w-xs">
           <ImageUpload value={form.avatar_url} onChange={url => setForm({ ...form, avatar_url: url })} />
+        </div>
+      </div>
+
+      {/* CV & OG */}
+      <div className="border border-white/10 p-8 space-y-8">
+        <div>
+          <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-2">CV / Resume</p>
+          <p className="text-xs text-white/20 mb-4">PDF 파일 — 홈 화면 "CV ↓" 버튼에 연결됩니다.</p>
+          <FileUpload
+            value={form.cv_url}
+            accept="application/pdf"
+            label="PDF 업로드"
+            onChange={url => setForm({ ...form, cv_url: url })}
+          />
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-2">OG Image</p>
+          <p className="text-xs text-white/20 mb-4">SNS 공유 미리보기 이미지 — 권장 사이즈 1200×630px</p>
+          <ImageUpload value={form.og_image_url} onChange={url => setForm({ ...form, og_image_url: url })} />
         </div>
       </div>
 

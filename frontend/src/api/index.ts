@@ -48,7 +48,7 @@ export const blogApi = {
 };
 
 export const uploadsApi = {
-  uploadImage: (file: File, onProgress?: (pct: number) => void) => {
+  upload: (file: File, onProgress?: (pct: number) => void) => {
     const form = new FormData();
     form.append('file', file);
     return api.post<{ url: string }>('/uploads', form, {
@@ -58,4 +58,6 @@ export const uploadsApi = {
       },
     }).then(r => r.data.url);
   },
+  uploadImage: (file: File, onProgress?: (pct: number) => void) =>
+    uploadsApi.upload(file, onProgress),
 };

@@ -5,8 +5,8 @@ export default function Splash({ onDone }: { onDone: () => void }) {
 
   useEffect(() => {
     const t1 = setTimeout(() => setPhase('hold'), 400);
-    const t2 = setTimeout(() => setPhase('out'), 1800);
-    const t3 = setTimeout(onDone, 2400);
+    const t2 = setTimeout(() => setPhase('out'), 3000);
+    const t3 = setTimeout(onDone, 3600);
     return () => { clearTimeout(t1); clearTimeout(t2); clearTimeout(t3); };
   }, [onDone]);
 
