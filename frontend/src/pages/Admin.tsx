@@ -705,7 +705,7 @@ function CertificationsTab() {
 // ─── Organizations tab ────────────────────────────────────────────────────────
 
 const EMPTY_ORG: Omit<Organization, 'id'> = {
-  name: '', institution: '', role: '', period: '', description: '', logo_url: '', link_url: '', order: 0,
+  name: '', institution: '', role: '', period: '', description: '', logo_url: '', link_url: '',
 };
 
 function OrganizationsTab() {
@@ -726,7 +726,7 @@ function OrganizationsTab() {
   const handleEdit = (o: Organization) => {
     setEditingId(o.id);
     setForm({ name: o.name, institution: o.institution, role: o.role, period: o.period,
-      description: o.description, logo_url: o.logo_url, link_url: o.link_url, order: o.order });
+      description: o.description, logo_url: o.logo_url, link_url: o.link_url });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -759,14 +759,9 @@ function OrganizationsTab() {
           <textarea rows={3} value={form.description}
             onChange={e => setForm({ ...form, description: e.target.value })}
             placeholder="활동 내용 (간단히)" className={`${inputCls} resize-none`} />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <input value={form.link_url}
-              onChange={e => setForm({ ...form, link_url: e.target.value })}
-              placeholder="링크 (GitHub 조직, 홈페이지 등)" className={inputCls} />
-            <input type="number" value={form.order}
-              onChange={e => setForm({ ...form, order: Number(e.target.value) })}
-              placeholder="정렬 순서 (숫자 낮을수록 위)" className={inputCls} />
-          </div>
+          <input value={form.link_url}
+            onChange={e => setForm({ ...form, link_url: e.target.value })}
+            placeholder="링크 (GitHub 조직, 홈페이지 등)" className={inputCls} />
           <div>
             <p className="text-[11px] font-semibold tracking-widest text-white/20 uppercase mb-3">로고 이미지</p>
             <ImageUpload value={form.logo_url} onChange={url => setForm({ ...form, logo_url: url })} />

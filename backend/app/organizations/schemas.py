@@ -9,7 +9,6 @@ class OrgOut(BaseModel):
     description: str
     logo_url: str
     link_url: str
-    order: int
 
     model_config = {"from_attributes": True}
 
@@ -21,4 +20,3 @@ class OrgCreate(BaseModel):
     description: str = ""
     logo_url: str = ""
     link_url: str = ""
-    order: int = 0

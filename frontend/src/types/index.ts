@@ -71,7 +71,6 @@ export interface Organization {
   description: string;
   logo_url: string;
   link_url: string;
-  order: number;
 }
 
 export interface Profile {

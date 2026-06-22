@@ -10,7 +10,7 @@ router = APIRouter(prefix="/organizations", tags=["organizations"])
 
 @router.get("", response_model=list[OrgOut])
 def list_orgs(db: Session = Depends(get_db)):
-    return db.query(Organization).order_by(Organization.order, Organization.id).all()
+    return db.query(Organization).order_by(Organization.id).all()
 
 
 @router.post("", response_model=OrgOut, dependencies=[Depends(require_auth)])

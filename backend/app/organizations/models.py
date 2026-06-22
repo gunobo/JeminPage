@@ -12,4 +12,3 @@ class Organization(Base):
     description = Column(Text, default="")
     logo_url = Column(String(500), default="")
     link_url = Column(String(500), default="")
-    order = Column(Integer, default=0)
