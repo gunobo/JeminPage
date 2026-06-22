@@ -606,6 +606,59 @@ function BlogTab() {
 
 type Tab = 'projects' | 'messages' | 'profile' | 'blog';
 
+function VisitorChart() {
+  const [data, setData] = useState<{ date: string; count: number }[]>([]);
+  const [range, setRange] = useState(30);
+
+  useEffect(() => {
+    statsApi.daily(range).then(setData).catch(() => {});
+  }, [range]);
+
+  if (data.length === 0) return null;
+  const max = Math.max(...data.map(d => d.count), 1);
+  const W = 800, H = 120, pad = 4;
+  const barW = (W - pad * (data.length - 1)) / data.length;
+
+  return (
+    <div className="border border-white/10 p-6 mb-8">
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">일별 방문자</p>
+        <div className="flex gap-2">
+          {[7, 30, 90].map(d => (
+            <button key={d} onClick={() => setRange(d)}
+              className={`text-[11px] font-semibold tracking-widest uppercase px-3 py-1 transition-colors ${
+                range === d ? 'text-white border border-white/30' : 'text-white/20 hover:text-white/50'
+              }`}>{d}일</button>
+          ))}
+        </div>
+      </div>
+      <svg viewBox={`0 0 ${W} ${H + 24}`} className="w-full" style={{ height: 120 }}>
+        {data.map((d, i) => {
+          const bh = Math.max(2, (d.count / max) * H);
+          const x = i * (barW + pad);
+          const showLabel = data.length <= 14 || i % Math.ceil(data.length / 10) === 0;
+          return (
+            <g key={d.date}>
+              <rect x={x} y={H - bh} width={barW} height={bh}
+                fill={d.count > 0 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.06)'} />
+              {d.count > 0 && (
+                <text x={x + barW / 2} y={H - bh - 4} textAnchor="middle"
+                  className="fill-white/40" style={{ fontSize: 9 }}>{d.count}</text>
+              )}
+              {showLabel && (
+                <text x={x + barW / 2} y={H + 16} textAnchor="middle"
+                  className="fill-white/20" style={{ fontSize: 9 }}>
+                  {d.date.slice(5)}
+                </text>
+              )}
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
+
 export default function Admin() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const [tab, setTab] = useState<Tab>('profile');
@@ -647,6 +700,8 @@ export default function Admin() {
             </div>
           </div>
         )}
+        <VisitorChart />
+
         <div className="flex justify-end mb-6">
           <button onClick={async () => {
             if (!confirm('방문자 수를 초기화하시겠습니까?')) return;

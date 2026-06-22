@@ -28,6 +28,7 @@ export const statsApi = {
   get: () => api.get<VisitorStats>('/stats').then(r => r.data),
   visit: () => api.post('/stats/visit').catch(() => {}),
   reset: () => api.delete('/stats'),
+  daily: (days = 30) => api.get<{ date: string; count: number }[]>(`/stats/daily?days=${days}`).then(r => r.data),
 };
 
 export const authApi = {
