@@ -42,11 +42,14 @@ export default function Projects() {
                         style={{ transform: i % 2 === 0 ? 'rotate(-2deg)' : 'rotate(2deg)', filter: 'drop-shadow(0 25px 40px rgba(0,0,0,0.8))' }}
                         onMouseEnter={e => (e.currentTarget.style.transform = 'rotate(0deg) scale(1.04)')}
                         onMouseLeave={e => (e.currentTarget.style.transform = i % 2 === 0 ? 'rotate(-2deg)' : 'rotate(2deg)')}>
-                        <img
-                          src={project.thumbnail_url}
-                          alt={project.title}
-                          className="w-full rounded-sm ring-1 ring-white/20"
-                        />
+                        <div className="relative rounded-sm overflow-hidden ring-1 ring-white/20">
+                          <img
+                            src={project.thumbnail_url}
+                            alt={project.title}
+                            className="w-full transition-transform duration-700 group-hover:scale-105"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-70 group-hover:opacity-30 transition-opacity duration-500" />
+                        </div>
                       </div>
                     </>
                   ) : (
