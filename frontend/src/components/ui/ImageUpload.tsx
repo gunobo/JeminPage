@@ -36,45 +36,40 @@ export default function ImageUpload({ value, onChange }: Props) {
         onClick={() => inputRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={e => e.preventDefault()}
-        className="border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-[#1a1a2e] transition-colors text-center"
+        className="border border-dashed border-white/10 p-4 cursor-pointer hover:border-white/30 transition-colors text-center"
       >
         {value ? (
           <div className="relative group">
-            <img src={value} alt="thumbnail" className="h-32 object-cover rounded mx-auto" />
-            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity rounded flex items-center justify-center">
-              <span className="text-white text-sm">클릭하여 변경</span>
+            <img src={value} alt="thumbnail" className="h-32 object-cover mx-auto opacity-70 group-hover:opacity-100 transition-opacity" />
+            <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <span className="text-white text-xs uppercase tracking-widest">Change</span>
             </div>
           </div>
         ) : (
-          <div className="py-4 text-gray-400 text-sm">
-            <p className="text-2xl mb-1">+</p>
-            <p>클릭하거나 드래그하여 이미지 업로드</p>
-            <p className="text-xs mt-1">JPG, PNG, WebP · 최대 5MB</p>
+          <div className="py-6 text-white/20 text-sm">
+            <p className="text-3xl mb-2">+</p>
+            <p className="text-xs uppercase tracking-widest">Click or drag to upload</p>
+            <p className="text-xs mt-1 text-white/10">JPG, PNG, WebP · Max 5MB</p>
           </div>
         )}
 
         {progress !== null && (
-          <div className="mt-2">
-            <div className="h-1.5 bg-gray-200 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#1a1a2e] transition-all duration-200"
-                style={{ width: `${progress}%` }}
-              />
+          <div className="mt-3">
+            <div className="h-px bg-white/10 overflow-hidden">
+              <div className="h-full bg-white transition-all duration-200" style={{ width: `${progress}%` }} />
             </div>
-            <p className="text-xs text-gray-400 mt-1">{progress}%</p>
+            <p className="text-xs text-white/20 mt-1">{progress}%</p>
           </div>
         )}
       </div>
 
-      {error && <p className="text-red-500 text-xs">{error}</p>}
+      {error && <p className="text-red-400 text-xs uppercase tracking-widest">{error}</p>}
 
       {value && (
-        <button
-          type="button"
-          onClick={() => onChange('')}
-          className="text-xs text-red-400 hover:text-red-600"
+        <button type="button" onClick={() => onChange('')}
+          className="text-xs text-red-400/40 hover:text-red-400 transition-colors uppercase tracking-widest"
         >
-          이미지 제거
+          Remove Image
         </button>
       )}
 
