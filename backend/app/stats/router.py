@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from ..database import get_db
-from ..auth import verify_token
+from ..auth.utils import require_auth
 from .service import get_stats, record_visit, reset_stats, get_daily_stats
 
 router = APIRouter(prefix="/stats", tags=["stats"])
@@ -21,12 +21,12 @@ def visit(db: Session = Depends(get_db)):
     return {"ok": True}
 
 
-@router.get("/daily", dependencies=[Depends(verify_token)])
+@router.get("/daily", dependencies=[Depends(require_auth)])
 def daily_stats(days: int = 30, db: Session = Depends(get_db)):
     return get_daily_stats(db, days)
 
 
-@router.delete("", dependencies=[Depends(verify_token)])
+@router.delete("", dependencies=[Depends(require_auth)])
 def reset(db: Session = Depends(get_db)):
     reset_stats(db)
     return {"ok": True}
