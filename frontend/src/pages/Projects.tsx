@@ -31,26 +31,26 @@ export default function Projects() {
           <div className="space-y-px bg-white/10">
             {projects.map((project, i) => (
               <div key={project.id} className="group bg-[#0a0a0a] grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-0">
-                <div className="flex items-center justify-center p-6 md:p-10 bg-white/[0.02]">
+                <div className="relative flex items-center justify-center overflow-hidden h-72 md:h-full min-h-[280px]">
                   {project.thumbnail_url ? (
-                    <div className="w-full rounded-lg overflow-hidden shadow-2xl ring-1 ring-white/10 transition-all duration-500 group-hover:shadow-white/10 group-hover:ring-white/20 group-hover:-translate-y-1">
-                      {/* 브라우저 크롬 */}
-                      <div className="flex items-center gap-1.5 px-3 h-8 bg-[#1a1a1a] border-b border-white/10 shrink-0">
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
-                        <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
-                        <div className="flex-1 mx-2 h-4 rounded bg-white/5 text-[10px] text-white/20 flex items-center px-2 truncate">
-                          {project.demo_url || 'imjemin.co.kr'}
-                        </div>
+                    <>
+                      {/* 배경 블러 레이어 */}
+                      <div className="absolute inset-0 scale-110"
+                        style={{ backgroundImage: `url(${project.thumbnail_url})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(20px) brightness(0.2)' }} />
+                      {/* 메인 이미지 */}
+                      <div className="relative z-10 w-[80%] transition-all duration-500 ease-out"
+                        style={{ transform: i % 2 === 0 ? 'rotate(-2deg)' : 'rotate(2deg)', filter: 'drop-shadow(0 25px 40px rgba(0,0,0,0.8))' }}
+                        onMouseEnter={e => (e.currentTarget.style.transform = 'rotate(0deg) scale(1.04)')}
+                        onMouseLeave={e => (e.currentTarget.style.transform = i % 2 === 0 ? 'rotate(-2deg)' : 'rotate(2deg)')}>
+                        <img
+                          src={project.thumbnail_url}
+                          alt={project.title}
+                          className="w-full rounded-sm ring-1 ring-white/20"
+                        />
                       </div>
-                      <img
-                        src={project.thumbnail_url}
-                        alt={project.title}
-                        className="w-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500"
-                      />
-                    </div>
+                    </>
                   ) : (
-                    <div className="w-full min-h-[200px] rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center">
+                    <div className="w-full h-full bg-white/5 flex items-center justify-center">
                       <span className="text-7xl font-black text-white/10">{String(i + 1).padStart(2, '0')}</span>
                     </div>
                   )}
