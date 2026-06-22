@@ -73,7 +73,7 @@ export default function Splash({ onDone }: { onDone: () => void }) {
           src="/favicon.svg"
           alt="logo"
           className="w-20 h-auto"
-          style={{ filter: 'invert(1)', opacity: 0.9 }}
+          style={{ opacity: 0.9 }}
         />
 
         {/* 타이핑 텍스트 */}
