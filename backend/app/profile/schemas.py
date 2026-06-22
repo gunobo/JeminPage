@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
+from typing import Any
 
 class SkillGroup(BaseModel):
     category: str
@@ -18,8 +19,13 @@ class ProfileOut(BaseModel):
     avatar_url: str
     cv_url: str
     og_image_url: str
-    skill_groups: list[SkillGroup]
-    yearly_goals: list[YearlyGoal]
+    skill_groups: list[SkillGroup] = []
+    yearly_goals: list[YearlyGoal] = []
+
+    @field_validator("skill_groups", "yearly_goals", mode="before")
+    @classmethod
+    def coerce_none_to_list(cls, v: Any) -> Any:
+        return v if v is not None else []
 
     model_config = {"from_attributes": True}
 
