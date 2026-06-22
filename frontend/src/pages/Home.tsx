@@ -230,10 +230,19 @@ export default function Home() {
             {featured.map((project, i) => (
               <FadeUp key={project.id} delay={i * 0.1}>
                 <div className="group bg-[#0a0a0a] grid grid-cols-1 md:grid-cols-[2fr_3fr] overflow-hidden">
-                  <div className="overflow-hidden h-64 md:h-80">
+                  <div className="relative flex items-center justify-center overflow-hidden h-64 md:h-80">
                     {project.thumbnail_url ? (
-                      <img src={project.thumbnail_url} alt={project.title}
-                        className="w-full h-full object-cover opacity-50 group-hover:opacity-90 group-hover:scale-105 transition-all duration-700" />
+                      <>
+                        <div className="absolute inset-0 scale-110"
+                          style={{ backgroundImage: `url(${project.thumbnail_url})`, backgroundSize: 'cover', backgroundPosition: 'center', filter: 'blur(20px) brightness(0.2)' }} />
+                        <div className="relative z-10 w-[80%] transition-all duration-500 ease-out"
+                          style={{ transform: i % 2 === 0 ? 'rotate(-2deg)' : 'rotate(2deg)', filter: 'drop-shadow(0 25px 40px rgba(0,0,0,0.8))' }}
+                          onMouseEnter={e => (e.currentTarget.style.transform = 'rotate(0deg) scale(1.04)')}
+                          onMouseLeave={e => (e.currentTarget.style.transform = i % 2 === 0 ? 'rotate(-2deg)' : 'rotate(2deg)')}>
+                          <img src={project.thumbnail_url} alt={project.title}
+                            className="w-full rounded-sm ring-1 ring-white/20 opacity-80 group-hover:opacity-100 transition-opacity duration-500" />
+                        </div>
+                      </>
                     ) : (
                       <div className="w-full h-full bg-white/[0.03] flex items-center justify-center">
                         <span className="font-black text-[100px] text-white/5">{String(i + 1).padStart(2, '0')}</span>
