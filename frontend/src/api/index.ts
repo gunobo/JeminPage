@@ -25,6 +25,7 @@ export const contactApi = {
 
 export const statsApi = {
   get: () => api.get<VisitorStats>('/stats').then(r => r.data),
+  visit: () => api.post('/stats/visit').catch(() => {}),
 };
 
 export const authApi = {
