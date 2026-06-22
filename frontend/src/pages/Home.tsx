@@ -139,7 +139,7 @@ export default function Home() {
             <div className="flex gap-6 items-center">
               <Link to="/projects"
                 className="group flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white border border-white/20 px-7 py-4 hover:bg-white hover:text-black transition-all duration-300">
-                Works <span className="group-hover:translate-x-1 transition-transform">→</span>
+                Projects <span className="group-hover:translate-x-1 transition-transform">→</span>
               </Link>
               <Link to="/contact"
                 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/30 hover:text-white transition-colors">
@@ -204,11 +204,11 @@ export default function Home() {
           <FadeUp>
             <div className="flex items-end justify-between mb-16 border-t border-white/10 pt-12">
               <div>
-                <span className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">Selected Works</span>
+                <span className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">Selected Projects</span>
                 <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">Projects</h2>
               </div>
               <Link to="/projects" className="text-[11px] font-semibold tracking-[0.2em] uppercase text-white/30 hover:text-white transition-colors">
-                All Works →
+                All Projects →
               </Link>
             </div>
           </FadeUp>

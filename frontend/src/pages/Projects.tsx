@@ -17,7 +17,7 @@ export default function Projects() {
       <div className="px-6 md:px-12 pt-32 pb-16 max-w-7xl mx-auto">
         <div className="border-b border-white/10 pb-12 mb-16">
           <span className="text-xs font-semibold tracking-[0.3em] text-white/30 uppercase">Portfolio</span>
-          <h1 className="font-black text-[10vw] tracking-tighter leading-none mt-2">Works</h1>
+          <h1 className="font-black text-[10vw] tracking-tighter leading-none mt-2">Projects</h1>
         </div>
 
         {loading ? (
