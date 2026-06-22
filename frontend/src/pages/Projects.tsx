@@ -46,7 +46,10 @@ export default function Projects() {
                           <img
                             src={project.thumbnail_url}
                             alt={project.title}
-                            className="w-full transition-transform duration-700 group-hover:scale-105"
+                            className="w-full transition-all duration-700 group-hover:scale-105"
+                            style={{ filter: 'grayscale(1) brightness(0.7) contrast(1.1)' }}
+                            onMouseEnter={e => ((e.target as HTMLImageElement).style.filter = 'grayscale(0) brightness(1) contrast(1)')}
+                            onMouseLeave={e => ((e.target as HTMLImageElement).style.filter = 'grayscale(1) brightness(0.7) contrast(1.1)')}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent opacity-70 group-hover:opacity-30 transition-opacity duration-500" />
                         </div>
