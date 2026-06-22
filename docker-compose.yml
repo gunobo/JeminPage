@@ -21,10 +21,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    deploy:
-      resources:
-        limits:
-          memory: 512m
 
   redis:
     image: redis:7-alpine
@@ -39,10 +35,6 @@ services:
       options:
         max-size: "5m"
         max-file: "2"
-    deploy:
-      resources:
-        limits:
-          memory: 128m
 
   backend:
     build: ./backend
@@ -60,10 +52,6 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
-    deploy:
-      resources:
-        limits:
-          memory: 256m
 
   frontend:
     build: ./frontend
@@ -77,10 +65,6 @@ services:
       options:
         max-size: "5m"
         max-file: "2"
-    deploy:
-      resources:
-        limits:
-          memory: 64m
 
 volumes:
   mysql_data:
