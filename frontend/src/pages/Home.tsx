@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { projectsApi, statsApi, profileApi } from '../api';
+import { projectsApi, statsApi, profileApi, organizationsApi } from '../api';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { useLang } from '../context/LanguageContext';
-import type { Project, VisitorStats, Profile } from '../types';
+import type { Project, VisitorStats, Profile, Organization } from '../types';
 
 function FadeUp({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
   const { ref, visible } = useScrollAnimation();
@@ -43,6 +43,7 @@ export default function Home() {
   const [featured, setFeatured] = useState<Project[]>([]);
   const [stats, setStats] = useState<VisitorStats | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const [orgs, setOrgs] = useState<Organization[]>([]);
   const { t } = useLang();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
@@ -51,6 +52,7 @@ export default function Home() {
 
   useEffect(() => {
     profileApi.get().then(setProfile).catch(() => {});
+    organizationsApi.list().then(setOrgs).catch(() => {});
     projectsApi.list().then(p => setFeatured(p.filter(x => x.is_featured).slice(0, 4)));
     if (!localStorage.getItem('visited')) {
       statsApi.visit();
@@ -297,6 +299,56 @@ export default function Home() {
                       </li>
                     ))}
                   </ul>
+                </div>
+              </FadeUp>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── ORGANIZATIONS ── */}
+      {orgs.length > 0 && (
+        <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto">
+          <FadeUp>
+            <div className="flex items-end justify-between mb-20">
+              <div>
+                <span className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">Activities</span>
+                <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">Organizations</h2>
+              </div>
+            </div>
+          </FadeUp>
+          <div className="space-y-px bg-white/5">
+            {orgs.map((org, i) => (
+              <FadeUp key={org.id} delay={i * 0.08}>
+                <div className="group bg-[#0a0a0a] flex items-center gap-6 md:gap-10 px-8 py-7 hover:bg-white/[0.02] transition-colors">
+                  {org.logo_url ? (
+                    <img src={org.logo_url} alt={org.name}
+                      className="w-12 h-12 object-cover rounded opacity-60 group-hover:opacity-100 transition-opacity shrink-0" />
+                  ) : (
+                    <div className="w-12 h-12 border border-white/10 flex items-center justify-center text-white/20 text-xl shrink-0 group-hover:border-white/20 transition-colors">
+                      ◎
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
+                      <h3 className="font-black text-lg md:text-xl tracking-tight text-white/80 group-hover:text-white transition-colors">
+                        {org.name}
+                      </h3>
+                      <span className="text-[11px] font-semibold tracking-widest text-white/20 uppercase shrink-0">{org.period}</span>
+                    </div>
+                    {org.role && (
+                      <p className="text-xs font-semibold uppercase tracking-widest text-white/30 mt-1">{org.role}</p>
+                    )}
+                    {org.description && (
+                      <p className="text-sm text-white/30 mt-2 leading-relaxed">{org.description}</p>
+                    )}
+                  </div>
+                  {org.link_url && (
+                    <a href={org.link_url} target="_blank" rel="noreferrer"
+                      className="text-[11px] font-semibold uppercase tracking-widest text-white/20 hover:text-white transition-colors shrink-0">
+                      ↗
+                    </a>
+                  )}
                 </div>
               </FadeUp>
             ))}

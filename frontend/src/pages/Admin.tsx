@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi } from '../api';
+import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi, organizationsApi } from '../api';
 import ImageUpload from '../components/ui/ImageUpload';
 import FileUpload from '../components/ui/FileUpload';
-import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost } from '../types';
+import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost, Organization } from '../types';
 
 const inputCls = 'w-full bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 focus:outline-none focus:border-white/30 transition-colors text-sm';
 const btnPrimary = 'px-6 py-3 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-white/80 transition-colors';
@@ -602,9 +602,125 @@ function BlogTab() {
   );
 }
 
+// ─── Organizations tab ────────────────────────────────────────────────────────
+
+const EMPTY_ORG: Omit<Organization, 'id'> = {
+  name: '', role: '', period: '', description: '', logo_url: '', link_url: '', order: 0,
+};
+
+function OrganizationsTab() {
+  const [orgs, setOrgs] = useState<Organization[]>([]);
+  const [form, setForm] = useState(EMPTY_ORG);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  const refresh = () => organizationsApi.list().then(setOrgs);
+  useEffect(() => { refresh(); }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingId) await organizationsApi.update(editingId, form);
+    else await organizationsApi.create(form);
+    setForm(EMPTY_ORG); setEditingId(null); refresh();
+  };
+
+  const handleEdit = (o: Organization) => {
+    setEditingId(o.id);
+    setForm({ name: o.name, role: o.role, period: o.period, description: o.description,
+      logo_url: o.logo_url, link_url: o.link_url, order: o.order });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('삭제하시겠습니까?')) return;
+    await organizationsApi.delete(id); refresh();
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="border border-white/10 p-8">
+        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-6">
+          {editingId ? '활동 수정' : '새 활동 추가'}
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input required value={form.name}
+            onChange={e => setForm({ ...form, name: e.target.value })}
+            placeholder="조직/동아리 이름 (예: 멋쟁이사자처럼)" className={inputCls} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input value={form.role}
+              onChange={e => setForm({ ...form, role: e.target.value })}
+              placeholder="역할 (예: 회장, 부원, 운영진)" className={inputCls} />
+            <input value={form.period}
+              onChange={e => setForm({ ...form, period: e.target.value })}
+              placeholder="활동 기간 (예: 2023.03 ~ 2024.02)" className={inputCls} />
+          </div>
+          <textarea rows={3} value={form.description}
+            onChange={e => setForm({ ...form, description: e.target.value })}
+            placeholder="활동 내용 (간단히)" className={`${inputCls} resize-none`} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input value={form.link_url}
+              onChange={e => setForm({ ...form, link_url: e.target.value })}
+              placeholder="링크 (GitHub 조직, 홈페이지 등)" className={inputCls} />
+            <input type="number" value={form.order}
+              onChange={e => setForm({ ...form, order: Number(e.target.value) })}
+              placeholder="정렬 순서 (숫자 낮을수록 위)" className={inputCls} />
+          </div>
+          <div>
+            <p className="text-[11px] font-semibold tracking-widest text-white/20 uppercase mb-3">로고 이미지</p>
+            <ImageUpload value={form.logo_url} onChange={url => setForm({ ...form, logo_url: url })} />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button type="submit" className={btnPrimary}>{editingId ? '수정 완료' : '추가하기'}</button>
+            {editingId && (
+              <button type="button" onClick={() => { setEditingId(null); setForm(EMPTY_ORG); }}
+                className={btnSecondary}>취소</button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div className="border border-white/10 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="border-b border-white/10">
+            <tr>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase w-12"></th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">이름</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden sm:table-cell">역할</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden md:table-cell">기간</th>
+              <th className="px-4 py-3 text-right text-[11px] font-semibold tracking-widest text-white/20 uppercase">관리</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {orgs.map(o => (
+              <tr key={o.id} className="hover:bg-white/[0.02] transition-colors">
+                <td className="px-4 py-3">
+                  {o.logo_url
+                    ? <img src={o.logo_url} alt="" className="w-10 h-10 object-cover opacity-60 rounded" />
+                    : <div className="w-10 h-10 bg-white/5 rounded flex items-center justify-center text-white/20 text-lg">◎</div>}
+                </td>
+                <td className="px-4 py-3 font-medium text-white/70">{o.name}</td>
+                <td className="px-4 py-3 text-white/30 hidden sm:table-cell">{o.role}</td>
+                <td className="px-4 py-3 text-white/30 hidden md:table-cell text-xs">{o.period}</td>
+                <td className="px-4 py-3 text-right whitespace-nowrap">
+                  <button onClick={() => handleEdit(o)}
+                    className="text-xs text-white/30 hover:text-white transition-colors mr-4 uppercase tracking-widest">수정</button>
+                  <button onClick={() => handleDelete(o.id)}
+                    className="text-xs text-red-400/50 hover:text-red-400 transition-colors uppercase tracking-widest">삭제</button>
+                </td>
+              </tr>
+            ))}
+            {orgs.length === 0 && (
+              <tr><td colSpan={5} className="px-6 py-12 text-center text-white/20 text-xs uppercase tracking-widest">아직 활동 기록이 없습니다.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-type Tab = 'projects' | 'messages' | 'profile' | 'blog';
+type Tab = 'projects' | 'messages' | 'profile' | 'blog' | 'organizations';
 
 function VisitorChart() {
   const [data, setData] = useState<{ date: string; count: number }[]>([]);
@@ -714,7 +830,7 @@ export default function Admin() {
 
         {/* Tabs */}
         <div className="flex gap-0 mb-8 border-b border-white/10">
-          {([['profile', '프로필'], ['projects', '프로젝트'], ['blog', '블로그'], ['messages', '메시지']] as [Tab, string][]).map(([t, label]) => (
+          {([['profile', '프로필'], ['projects', '프로젝트'], ['organizations', '활동'], ['blog', '블로그'], ['messages', '메시지']] as [Tab, string][]).map(([t, label]) => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-6 py-3 text-xs font-black uppercase tracking-widest border-b-2 -mb-px transition-colors ${
                 tab === t ? 'border-white text-white' : 'border-transparent text-white/20 hover:text-white/50'
@@ -726,6 +842,7 @@ export default function Admin() {
 
         {tab === 'profile' && <ProfileTab />}
         {tab === 'projects' && <ProjectsTab />}
+        {tab === 'organizations' && <OrganizationsTab />}
         {tab === 'blog' && <BlogTab />}
         {tab === 'messages' && <MessagesTab />}
       </div>

@@ -53,6 +53,17 @@ export interface BlogPost {
   updated_at: string;
 }
 
+export interface Organization {
+  id: number;
+  name: string;
+  role: string;
+  period: string;
+  description: string;
+  logo_url: string;
+  link_url: string;
+  order: number;
+}
+
 export interface Profile {
   name: string;
   tagline: string;

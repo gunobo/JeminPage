@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Project, ContactForm, ContactMessage, VisitorStats, Profile, BlogPost } from '../types';
+import type { Project, ContactForm, ContactMessage, VisitorStats, Profile, BlogPost, Organization } from '../types';
 
 const api = axios.create({ baseURL: '/api' });
 
@@ -47,6 +47,13 @@ export const blogApi = {
   create: (data: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) => api.post<BlogPost>('/blog', data).then(r => r.data),
   update: (id: number, data: Omit<BlogPost, 'id' | 'created_at' | 'updated_at'>) => api.put<BlogPost>(`/blog/${id}`, data).then(r => r.data),
   delete: (id: number) => api.delete(`/blog/${id}`),
+};
+
+export const organizationsApi = {
+  list: () => api.get<Organization[]>('/organizations').then(r => r.data),
+  create: (data: Omit<Organization, 'id'>) => api.post<Organization>('/organizations', data).then(r => r.data),
+  update: (id: number, data: Omit<Organization, 'id'>) => api.put<Organization>(`/organizations/${id}`, data).then(r => r.data),
+  delete: (id: number) => api.delete(`/organizations/${id}`),
 };
 
 export const uploadsApi = {

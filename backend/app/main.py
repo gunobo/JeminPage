@@ -10,6 +10,7 @@ from .stats.router import router as stats_router
 from .uploads.router import router as uploads_router
 from .profile.router import router as profile_router
 from .blog.router import router as blog_router
+from .organizations.router import router as organizations_router
 
 # import all models so SQLAlchemy registers them before create_all
 from .projects import models as _pm  # noqa: F401
@@ -17,6 +18,7 @@ from .contact import models as _cm  # noqa: F401
 from .profile import models as _prm  # noqa: F401
 from .blog import models as _bm  # noqa: F401
 from .stats import models as _sm  # noqa: F401
+from .organizations import models as _om  # noqa: F401
 
 Base.metadata.create_all(bind=engine)
 
@@ -43,6 +45,7 @@ app.include_router(stats_router, prefix="/api")
 app.include_router(uploads_router, prefix="/api")
 app.include_router(profile_router, prefix="/api")
 app.include_router(blog_router, prefix="/api")
+app.include_router(organizations_router, prefix="/api")
 
 @app.get("/api/health")
 def health():
