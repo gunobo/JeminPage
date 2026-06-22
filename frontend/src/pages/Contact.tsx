@@ -52,6 +52,7 @@ export default function Contact() {
               <div className="border border-white/10 p-12 text-center">
                 <p className="text-white/60 text-sm uppercase tracking-widest mb-2">Sent!</p>
                 <p className="text-white font-semibold">메시지가 전송되었습니다.</p>
+                <p className="text-white/40 text-sm mt-3">추후 연락은 작성하신 이메일로 확인해주세요!</p>
                 <button
                   onClick={() => setStatus('idle')}
                   className="mt-8 text-xs font-semibold uppercase tracking-widest text-white/40 hover:text-white transition-colors"
