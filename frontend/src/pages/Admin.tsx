@@ -268,7 +268,7 @@ function MessagesTab() {
 
 const EMPTY_PROFILE: Profile = {
   name: '', tagline: '', bio: '', github_url: '', email: '',
-  portfolio_url: '', avatar_url: '', cv_url: '', og_image_url: '', skill_groups: [], yearly_goals: [],
+  portfolio_url: '', avatar_url: '', cv_url: '', og_image_url: '', skill_groups: [], yearly_goals: [], marquee_items: [],
 };
 
 function ProfileTab() {
@@ -383,6 +383,37 @@ function ProfileTab() {
                 <button type="button" onClick={() => addSkill(gi)}
                   className="border border-white/10 text-white/40 px-4 hover:border-white/30 hover:text-white transition-colors">+</button>
               </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Marquee */}
+      <div className="border border-white/10 p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">흘러가는 텍스트</p>
+            <p className="text-xs text-white/20 mt-1">홈 화면 가운데 띠에 표시되는 키워드</p>
+          </div>
+          <button type="button"
+            onClick={() => setForm({ ...form, marquee_items: [...(form.marquee_items || []), ''] })}
+            className={btnSecondary}>+ 추가</button>
+        </div>
+        {(!form.marquee_items || form.marquee_items.length === 0) && (
+          <p className="text-xs text-white/20 text-center py-6 uppercase tracking-widest">키워드가 없습니다.</p>
+        )}
+        <div className="space-y-2">
+          {(form.marquee_items || []).map((item, i) => (
+            <div key={i} className="flex gap-2">
+              <input
+                value={item}
+                onChange={e => setForm({ ...form, marquee_items: form.marquee_items.map((v, idx) => idx === i ? e.target.value : v) })}
+                placeholder="키워드 (예: 풀스택 개발자)"
+                className={`${inputCls} flex-1`}
+              />
+              <button type="button"
+                onClick={() => setForm({ ...form, marquee_items: form.marquee_items.filter((_, idx) => idx !== i) })}
+                className="px-3 text-red-400/40 hover:text-red-400 transition-colors">×</button>
             </div>
           ))}
         </div>

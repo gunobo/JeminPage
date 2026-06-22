@@ -85,4 +85,5 @@ export interface Profile {
   og_image_url: string;
   skill_groups: SkillGroup[];
   yearly_goals: YearlyGoal[];
+  marquee_items: string[];
 }

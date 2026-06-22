@@ -17,3 +17,4 @@ class Profile(Base):
     # [{"category": "Backend", "skills": ["Python", "FastAPI"]}]
     skill_groups = Column(JSON, default=list)
     yearly_goals = Column(JSON, default=list)
+    marquee_items = Column(JSON, default=list)

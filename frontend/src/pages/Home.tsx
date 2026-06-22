@@ -177,7 +177,9 @@ export default function Home() {
       {/* ── MARQUEE ── */}
       <div className="border-y border-white/10 py-5 overflow-hidden">
         <div className="flex gap-12 animate-[marquee_20s_linear_infinite] whitespace-nowrap">
-          {Array(3).fill(['Development', 'Design', 'React', 'FastAPI', 'Docker', 'Portfolio', 'Creative']).flat().map((t, i) => (
+          {Array(3).fill(
+            (profile?.marquee_items?.length ? profile.marquee_items : ['Development', 'Design', 'React', 'FastAPI', 'Docker', 'Portfolio', 'Creative'])
+          ).flat().map((t, i) => (
             <span key={i} className="text-xs font-black uppercase tracking-[0.3em] text-white/20 shrink-0">
               {t} <span className="text-white/10 mx-4">✦</span>
             </span>
