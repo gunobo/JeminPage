@@ -28,18 +28,18 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
-        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-4">Admin</p>
-        <h1 className="font-black text-4xl tracking-tighter mb-10">Login</h1>
+        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-4">관리자</p>
+        <h1 className="font-black text-4xl tracking-tighter mb-10">로그인</h1>
         <form onSubmit={handleSubmit} className="space-y-0">
           <input
             type="password" required value={password}
             onChange={e => setPassword(e.target.value)}
             className={inputCls}
-            placeholder="Password"
+            placeholder="비밀번호"
           />
           {error && <p className="text-red-400 text-xs uppercase tracking-widest pt-3">{error}</p>}
           <button type="submit" className={`${btnPrimary} w-full mt-4 py-4`}>
-            Enter →
+            입장 →
           </button>
         </form>
       </div>
@@ -94,21 +94,21 @@ function ProjectsTab() {
       {/* Form */}
       <div className="border border-white/10 p-8">
         <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-6">
-          {editingId ? 'Edit Project' : 'New Project'}
+          {editingId ? '프로젝트 수정' : '새 프로젝트'}
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input required value={form.title}
             onChange={e => setForm({ ...form, title: e.target.value })}
-            placeholder="Project Title" className={inputCls} />
+            placeholder="프로젝트 제목" className={inputCls} />
           <textarea required rows={3} value={form.description}
             onChange={e => setForm({ ...form, description: e.target.value })}
-            placeholder="Description" className={`${inputCls} resize-none`} />
+            placeholder="설명" className={`${inputCls} resize-none`} />
 
           <div className="flex gap-2">
             <input value={techInput}
               onChange={e => setTechInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTech())}
-              placeholder="Tech stack (Enter to add)" className={`${inputCls} flex-1`} />
+              placeholder="기술 스택 입력 후 Enter" className={`${inputCls} flex-1`} />
             <button type="button" onClick={addTech}
               className="border border-white/10 text-white/40 px-4 hover:border-white/30 hover:text-white transition-colors">+</button>
           </div>
@@ -126,7 +126,7 @@ function ProjectsTab() {
           )}
 
           <div>
-            <p className="text-[11px] font-semibold tracking-widest text-white/20 uppercase mb-3">Thumbnail</p>
+            <p className="text-[11px] font-semibold tracking-widest text-white/20 uppercase mb-3">썸네일</p>
             <ImageUpload value={form.thumbnail_url} onChange={url => setForm({ ...form, thumbnail_url: url })} />
           </div>
 
@@ -144,14 +144,14 @@ function ProjectsTab() {
               onClick={() => setForm({ ...form, is_featured: !form.is_featured })}>
               <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-black transition-transform ${form.is_featured ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </div>
-            <span className="text-sm text-white/40 group-hover:text-white/60 transition-colors">Featured on main page</span>
+            <span className="text-sm text-white/40 group-hover:text-white/60 transition-colors">메인 페이지에 표시</span>
           </label>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit" className={btnPrimary}>{editingId ? 'Update' : 'Add Project'}</button>
+            <button type="submit" className={btnPrimary}>{editingId ? '수정 완료' : '추가하기'}</button>
             {editingId && (
               <button type="button" onClick={() => { setEditingId(null); setForm(EMPTY_FORM); }}
-                className={btnSecondary}>Cancel</button>
+                className={btnSecondary}>취소</button>
             )}
           </div>
         </form>
@@ -163,10 +163,10 @@ function ProjectsTab() {
           <thead className="border-b border-white/10">
             <tr>
               <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase w-12"></th>
-              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">Title</th>
-              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden sm:table-cell">Stack</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">제목</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden sm:table-cell">스택</th>
               <th className="px-4 py-3 text-center text-[11px] font-semibold tracking-widest text-white/20 uppercase">★</th>
-              <th className="px-4 py-3 text-right text-[11px] font-semibold tracking-widest text-white/20 uppercase">Actions</th>
+              <th className="px-4 py-3 text-right text-[11px] font-semibold tracking-widest text-white/20 uppercase">관리</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -189,7 +189,7 @@ function ProjectsTab() {
               </tr>
             ))}
             {projects.length === 0 && (
-              <tr><td colSpan={5} className="px-6 py-12 text-center text-white/20 text-xs uppercase tracking-widest">No projects yet.</td></tr>
+              <tr><td colSpan={5} className="px-6 py-12 text-center text-white/20 text-xs uppercase tracking-widest">아직 프로젝트가 없습니다.</td></tr>
             )}
           </tbody>
         </table>
@@ -218,13 +218,13 @@ function MessagesTab() {
   return (
     <div className="border border-white/10 overflow-hidden">
       <div className="px-6 py-4 border-b border-white/10 flex items-center gap-3">
-        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">Messages</p>
+        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">메시지</p>
         {unreadCount > 0 && (
           <span className="text-[10px] font-bold px-2 py-0.5 bg-white text-black">{unreadCount}</span>
         )}
       </div>
       {messages.length === 0 ? (
-        <div className="py-16 text-center text-white/20 text-xs uppercase tracking-widest">No messages.</div>
+        <div className="py-16 text-center text-white/20 text-xs uppercase tracking-widest">메시지가 없습니다.</div>
       ) : (
         <ul className="divide-y divide-white/5">
           {messages.map(msg => (
@@ -252,7 +252,7 @@ function MessagesTab() {
                   </div>
                   <a href={`mailto:${msg.email}`}
                     className="inline-block mt-3 text-xs text-white/30 hover:text-white transition-colors uppercase tracking-widest">
-                    Reply to {msg.email} →
+                    답장하기: {msg.email} →
                   </a>
                 </div>
               )}
@@ -303,7 +303,7 @@ function ProfileTab() {
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Basic */}
       <div className="border border-white/10 p-8">
-        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-6">Basic Info</p>
+        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-6">기본 정보</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })}
             placeholder="Name" className={inputCls} />
@@ -322,7 +322,7 @@ function ProfileTab() {
 
       {/* Avatar */}
       <div className="border border-white/10 p-8">
-        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-6">Profile Photo</p>
+        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-6">프로필 사진</p>
         <div className="max-w-xs">
           <ImageUpload value={form.avatar_url} onChange={url => setForm({ ...form, avatar_url: url })} />
         </div>
@@ -341,7 +341,7 @@ function ProfileTab() {
           />
         </div>
         <div>
-          <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-2">OG Image</p>
+          <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-2">OG 이미지</p>
           <p className="text-xs text-white/20 mb-4">SNS 공유 미리보기 이미지 — 권장 사이즈 1200×630px</p>
           <ImageUpload value={form.og_image_url} onChange={url => setForm({ ...form, og_image_url: url })} />
         </div>
@@ -351,10 +351,10 @@ function ProfileTab() {
       <div className="border border-white/10 p-8">
         <div className="flex items-center justify-between mb-6">
           <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">Skills</p>
-          <button type="button" onClick={addSkillGroup} className={btnSecondary}>+ Category</button>
+          <button type="button" onClick={addSkillGroup} className={btnSecondary}>+ 카테고리</button>
         </div>
         {form.skill_groups.length === 0 && (
-          <p className="text-xs text-white/20 text-center py-6 uppercase tracking-widest">No categories yet.</p>
+          <p className="text-xs text-white/20 text-center py-6 uppercase tracking-widest">카테고리가 없습니다.</p>
         )}
         <div className="space-y-4">
           {form.skill_groups.map((group, gi) => (
@@ -362,7 +362,7 @@ function ProfileTab() {
               <div className="flex gap-2 mb-3">
                 <input value={group.category}
                   onChange={e => updateGroup(gi, { category: e.target.value })}
-                  placeholder="Category (e.g. Backend)" className={`${inputCls} flex-1`} />
+                  placeholder="카테고리 (예: 백엔드)" className={`${inputCls} flex-1`} />
                 <button type="button" onClick={() => removeGroup(gi)}
                   className="px-3 text-red-400/40 hover:text-red-400 transition-colors text-sm">×</button>
               </div>
@@ -379,7 +379,7 @@ function ProfileTab() {
                 <input value={skillInput[gi] || ''}
                   onChange={e => setSkillInput({ ...skillInput, [gi]: e.target.value })}
                   onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addSkill(gi))}
-                  placeholder="Add skill (Enter)" className={`${inputCls} flex-1`} />
+                  placeholder="기술 추가 후 Enter" className={`${inputCls} flex-1`} />
                 <button type="button" onClick={() => addSkill(gi)}
                   className="border border-white/10 text-white/40 px-4 hover:border-white/30 hover:text-white transition-colors">+</button>
               </div>
@@ -397,7 +397,7 @@ function ProfileTab() {
             className={btnSecondary}>+ Goal</button>
         </div>
         {form.yearly_goals.length === 0 && (
-          <p className="text-xs text-white/20 text-center py-6 uppercase tracking-widest">No goals yet.</p>
+          <p className="text-xs text-white/20 text-center py-6 uppercase tracking-widest">아직 목표가 없습니다.</p>
         )}
         <div className="space-y-3">
           {form.yearly_goals.map((goal, i) => (
@@ -421,7 +421,7 @@ function ProfileTab() {
       </div>
 
       <button type="submit" className={`${btnPrimary} w-full py-4`}>
-        {saved ? '✓ Saved' : 'Save Changes →'}
+        {saved ? '✓ 저장됨' : '저장하기 →'}
       </button>
     </form>
   );
@@ -431,11 +431,23 @@ function ProfileTab() {
 
 const EMPTY_POST = { title: '', slug: '', content: '', excerpt: '', tags: [] as string[], thumbnail_url: '', is_published: false };
 
+function renderContent(content: string) {
+  return content.split('\n').map((line, i) => {
+    if (line.startsWith('# ')) return <h2 key={i} className="font-black text-2xl tracking-tight mt-8 mb-3">{line.slice(2)}</h2>;
+    if (line.startsWith('## ')) return <h3 key={i} className="font-black text-xl tracking-tight mt-6 mb-2">{line.slice(3)}</h3>;
+    if (line.startsWith('### ')) return <h4 key={i} className="font-bold text-lg mt-4 mb-2 text-white/80">{line.slice(4)}</h4>;
+    if (line.startsWith('- ')) return <li key={i} className="text-white/50 ml-4 list-disc mb-1 text-sm">{line.slice(2)}</li>;
+    if (line.trim() === '') return <div key={i} className="h-3" />;
+    return <p key={i} className="text-white/50 leading-relaxed mb-1 text-sm">{line}</p>;
+  });
+}
+
 function BlogTab() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [form, setForm] = useState(EMPTY_POST);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [tagInput, setTagInput] = useState('');
+  const [preview, setPreview] = useState(false);
 
   const refresh = () => blogApi.listAll().then(setPosts);
   useEffect(() => { refresh(); }, []);
@@ -444,11 +456,12 @@ function BlogTab() {
     e.preventDefault();
     if (editingId) await blogApi.update(editingId, form);
     else await blogApi.create(form);
-    setForm(EMPTY_POST); setEditingId(null); refresh();
+    setForm(EMPTY_POST); setEditingId(null); setPreview(false); refresh();
   };
 
   const handleEdit = (p: BlogPost) => {
     setEditingId(p.id);
+    setPreview(false);
     setForm({ title: p.title, slug: p.slug, content: p.content, excerpt: p.excerpt || '',
       tags: p.tags, thumbnail_url: p.thumbnail_url || '', is_published: p.is_published });
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -460,8 +473,8 @@ function BlogTab() {
   };
 
   const addTag = () => {
-    const t = tagInput.trim();
-    if (t && !form.tags.includes(t)) setForm({ ...form, tags: [...form.tags, t] });
+    const tag = tagInput.trim();
+    if (tag && !form.tags.includes(tag)) setForm({ ...form, tags: [...form.tags, tag] });
     setTagInput('');
   };
 
@@ -471,33 +484,43 @@ function BlogTab() {
   return (
     <div className="space-y-6">
       <div className="border border-white/10 p-8">
-        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-6">
-          {editingId ? 'Edit Post' : 'New Post'}
-        </p>
+        {/* 헤더 */}
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">
+            {editingId ? '글 수정' : '새 글 작성'}
+          </p>
+          <button type="button" onClick={() => setPreview(!preview)}
+            className={`text-xs font-semibold uppercase tracking-widest transition-colors px-4 py-2 border ${
+              preview ? 'border-white text-white' : 'border-white/10 text-white/30 hover:border-white/30 hover:text-white'
+            }`}>
+            {preview ? '✏️ 편집' : '👁 미리보기'}
+          </button>
+        </div>
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <input required value={form.title}
             onChange={e => setForm({ ...form, title: e.target.value, slug: editingId ? form.slug : autoSlug(e.target.value) })}
-            placeholder="Title" className={inputCls} />
+            placeholder="제목" className={inputCls} />
           <input required value={form.slug}
             onChange={e => setForm({ ...form, slug: e.target.value })}
-            placeholder="Slug (URL)" className={inputCls} />
+            placeholder="슬러그 (URL용, 영문)" className={inputCls} />
           <input value={form.excerpt}
             onChange={e => setForm({ ...form, excerpt: e.target.value })}
-            placeholder="Excerpt (optional)" className={inputCls} />
+            placeholder="요약 (선택사항 — 목록에 표시)" className={inputCls} />
 
           <div className="flex gap-2">
             <input value={tagInput}
               onChange={e => setTagInput(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTag())}
-              placeholder="Tags (Enter to add)" className={`${inputCls} flex-1`} />
+              placeholder="태그 입력 후 Enter" className={`${inputCls} flex-1`} />
             <button type="button" onClick={addTag}
               className="border border-white/10 text-white/40 px-4 hover:border-white/30 hover:text-white transition-colors">+</button>
           </div>
           {form.tags.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {form.tags.map((t, i) => (
+              {form.tags.map((tag, i) => (
                 <span key={i} className="text-xs px-3 py-1 border border-white/10 text-white/40 flex items-center gap-2">
-                  {t}
+                  {tag}
                   <button type="button" onClick={() => setForm({ ...form, tags: form.tags.filter((_, j) => j !== i) })}
                     className="text-white/20 hover:text-red-400">×</button>
                 </span>
@@ -505,36 +528,54 @@ function BlogTab() {
             </div>
           )}
 
-          <textarea required rows={16} value={form.content}
-            onChange={e => setForm({ ...form, content: e.target.value })}
-            placeholder={'# 제목\n\n## 소제목\n\n내용을 입력하세요...\n\n- 항목 1\n- 항목 2'}
-            className={`${inputCls} resize-y font-mono text-xs leading-relaxed`} />
+          {/* 에디터 / 미리보기 */}
+          {preview ? (
+            <div className="border border-white/10 p-6 min-h-64">
+              {form.title && <h1 className="font-black text-3xl tracking-tight mb-4">{form.title}</h1>}
+              {form.tags.length > 0 && (
+                <div className="flex gap-2 mb-6">
+                  {form.tags.map(tag => (
+                    <span key={tag} className="text-[11px] px-2 py-0.5 border border-white/10 text-white/20 uppercase tracking-widest">{tag}</span>
+                  ))}
+                </div>
+              )}
+              <div className="border-t border-white/10 pt-6">
+                {form.content ? renderContent(form.content) : <p className="text-white/20 text-sm">내용을 입력하세요...</p>}
+              </div>
+            </div>
+          ) : (
+            <textarea required rows={18} value={form.content}
+              onChange={e => setForm({ ...form, content: e.target.value })}
+              placeholder={'# 제목\n\n## 소제목\n\n내용을 입력하세요...\n\n- 항목 1\n- 항목 2'}
+              className={`${inputCls} resize-y font-mono text-xs leading-relaxed`} />
+          )}
 
           <label className="flex items-center gap-3 cursor-pointer group">
             <div className={`w-10 h-5 rounded-full transition-colors relative ${form.is_published ? 'bg-white' : 'bg-white/10'}`}
               onClick={() => setForm({ ...form, is_published: !form.is_published })}>
               <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-black transition-transform ${form.is_published ? 'translate-x-5' : 'translate-x-0.5'}`} />
             </div>
-            <span className="text-sm text-white/40 group-hover:text-white/60 transition-colors">Published</span>
+            <span className="text-sm text-white/40 group-hover:text-white/60 transition-colors">발행</span>
           </label>
 
           <div className="flex gap-3 pt-2">
-            <button type="submit" className={btnPrimary}>{editingId ? 'Update' : 'Publish'}</button>
+            <button type="submit" className={btnPrimary}>{editingId ? '수정 완료' : '발행하기'}</button>
             {editingId && (
-              <button type="button" onClick={() => { setEditingId(null); setForm(EMPTY_POST); }} className={btnSecondary}>Cancel</button>
+              <button type="button" onClick={() => { setEditingId(null); setForm(EMPTY_POST); setPreview(false); }} className={btnSecondary}>취소</button>
             )}
           </div>
         </form>
       </div>
 
+      {/* 글 목록 */}
       <div className="border border-white/10 overflow-hidden">
         <table className="w-full text-sm">
           <thead className="border-b border-white/10">
             <tr>
-              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">Title</th>
-              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden sm:table-cell">Tags</th>
-              <th className="px-4 py-3 text-center text-[11px] font-semibold tracking-widest text-white/20 uppercase">Pub</th>
-              <th className="px-4 py-3 text-right text-[11px] font-semibold tracking-widest text-white/20 uppercase">Actions</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">제목</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden sm:table-cell">태그</th>
+              <th className="px-4 py-3 text-center text-[11px] font-semibold tracking-widest text-white/20 uppercase">발행</th>
+              <th className="px-4 py-3 text-right text-[11px] font-semibold tracking-widest text-white/20 uppercase">관리</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
@@ -545,14 +586,14 @@ function BlogTab() {
                 <td className="px-4 py-3 text-center text-white/40">{p.is_published ? '✓' : ''}</td>
                 <td className="px-4 py-3 text-right whitespace-nowrap">
                   <button onClick={() => handleEdit(p)}
-                    className="text-xs text-white/30 hover:text-white transition-colors mr-4 uppercase tracking-widest">Edit</button>
+                    className="text-xs text-white/30 hover:text-white transition-colors mr-4 uppercase tracking-widest">수정</button>
                   <button onClick={() => handleDelete(p.id)}
-                    className="text-xs text-red-400/50 hover:text-red-400 transition-colors uppercase tracking-widest">Del</button>
+                    className="text-xs text-red-400/50 hover:text-red-400 transition-colors uppercase tracking-widest">삭제</button>
                 </td>
               </tr>
             ))}
             {posts.length === 0 && (
-              <tr><td colSpan={4} className="px-6 py-12 text-center text-white/20 text-xs uppercase tracking-widest">No posts yet.</td></tr>
+              <tr><td colSpan={4} className="px-6 py-12 text-center text-white/20 text-xs uppercase tracking-widest">아직 글이 없습니다.</td></tr>
             )}
           </tbody>
         </table>
@@ -584,12 +625,12 @@ export default function Admin() {
         {/* Header */}
         <div className="flex items-center justify-between mb-10 border-b border-white/10 pb-8">
           <div>
-            <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-1">Dashboard</p>
-            <h1 className="font-black text-3xl tracking-tighter">Admin</h1>
+            <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-1">대시보드</p>
+            <h1 className="font-black text-3xl tracking-tighter">관리자</h1>
           </div>
           <button onClick={handleLogout}
             className="text-xs font-semibold uppercase tracking-widest text-white/20 hover:text-white transition-colors">
-            Logout →
+            로그아웃 →
           </button>
         </div>
 
@@ -598,18 +639,18 @@ export default function Admin() {
           <div className="grid grid-cols-2 gap-px bg-white/5 mb-8">
             <div className="bg-[#0a0a0a] p-6">
               <p className="font-black text-4xl">{stats.today}</p>
-              <p className="text-[11px] font-semibold tracking-widest text-white/20 uppercase mt-1">Today</p>
+              <p className="text-[11px] font-semibold tracking-widest text-white/20 uppercase mt-1">오늘</p>
             </div>
             <div className="bg-[#0a0a0a] p-6">
               <p className="font-black text-4xl">{stats.total}</p>
-              <p className="text-[11px] font-semibold tracking-widest text-white/20 uppercase mt-1">Total</p>
+              <p className="text-[11px] font-semibold tracking-widest text-white/20 uppercase mt-1">전체</p>
             </div>
           </div>
         )}
 
         {/* Tabs */}
         <div className="flex gap-0 mb-8 border-b border-white/10">
-          {([['profile', 'Profile'], ['projects', 'Projects'], ['blog', 'Blog'], ['messages', 'Messages']] as [Tab, string][]).map(([t, label]) => (
+          {([['profile', '프로필'], ['projects', '프로젝트'], ['blog', '블로그'], ['messages', '메시지']] as [Tab, string][]).map(([t, label]) => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-6 py-3 text-xs font-black uppercase tracking-widest border-b-2 -mb-px transition-colors ${
                 tab === t ? 'border-white text-white' : 'border-transparent text-white/20 hover:text-white/50'
