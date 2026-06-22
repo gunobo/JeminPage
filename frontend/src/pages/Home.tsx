@@ -331,14 +331,11 @@ export default function Home() {
             {orgs.map((org, i) => (
               <FadeUp key={org.id} delay={i * 0.08}>
                 <div className="group bg-[#0a0a0a] flex items-center gap-6 md:gap-10 px-8 py-7 hover:bg-white/[0.02] transition-colors">
-                  {org.logo_url ? (
-                    <img src={org.logo_url} alt={org.name}
-                      className="w-12 h-12 object-cover rounded opacity-60 group-hover:opacity-100 transition-opacity shrink-0" />
-                  ) : (
-                    <div className="w-12 h-12 border border-white/10 flex items-center justify-center text-white/20 text-xl shrink-0 group-hover:border-white/20 transition-colors">
-                      ◎
-                    </div>
-                  )}
+                  <img
+                    src={org.logo_url || profile?.avatar_url || ''}
+                    alt={org.name}
+                    className="w-12 h-12 object-cover rounded opacity-60 group-hover:opacity-100 transition-opacity shrink-0"
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
                       <div>
