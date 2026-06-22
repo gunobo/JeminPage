@@ -1,27 +1,29 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
 const links = [
   { to: '/', label: 'Home' },
-  { to: '/projects', label: 'Projects' },
+  { to: '/projects', label: 'Works' },
   { to: '/contact', label: 'Contact' },
 ];
 
 export default function Navbar() {
   const { pathname } = useLocation();
+  const [open, setOpen] = useState(false);
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur border-b border-gray-200">
-      <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
-        <Link to="/" className="font-serif text-xl font-bold text-[#1a1a2e] tracking-tight">
+    <nav className="fixed top-0 left-0 right-0 z-50 mix-blend-difference">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <Link to="/" className="font-black text-lg text-white tracking-tighter uppercase">
           imjemin
         </Link>
-        <ul className="flex items-center gap-8 list-none m-0 p-0">
+        <ul className="hidden md:flex items-center gap-8 list-none m-0 p-0">
           {links.map(({ to, label }) => (
             <li key={to}>
               <Link
                 to={to}
-                className={`text-sm font-medium transition-colors ${
-                  pathname === to ? 'text-[#e94560]' : 'text-gray-600 hover:text-[#1a1a2e]'
+                className={`text-xs font-semibold tracking-widest uppercase transition-opacity ${
+                  pathname === to ? 'text-white opacity-100' : 'text-white opacity-50 hover:opacity-100'
                 }`}
               >
                 {label}
@@ -31,13 +33,37 @@ export default function Navbar() {
           <li>
             <Link
               to="/admin"
-              className="text-sm font-medium px-4 py-1.5 border border-[#1a1a2e] text-[#1a1a2e] hover:bg-[#1a1a2e] hover:text-white transition-colors rounded"
+              className="text-xs font-semibold tracking-widest uppercase text-white opacity-50 hover:opacity-100 transition-opacity"
             >
               Admin
             </Link>
           </li>
         </ul>
+        <button
+          className="md:hidden text-white opacity-70 hover:opacity-100"
+          onClick={() => setOpen(!open)}
+        >
+          <div className="flex flex-col gap-1.5">
+            <span className={`block w-6 h-0.5 bg-white transition-transform ${open ? 'rotate-45 translate-y-2' : ''}`} />
+            <span className={`block w-6 h-0.5 bg-white transition-opacity ${open ? 'opacity-0' : ''}`} />
+            <span className={`block w-6 h-0.5 bg-white transition-transform ${open ? '-rotate-45 -translate-y-2' : ''}`} />
+          </div>
+        </button>
       </div>
+      {open && (
+        <div className="md:hidden bg-black/95 backdrop-blur px-6 py-8 flex flex-col gap-6">
+          {links.map(({ to, label }) => (
+            <Link key={to} to={to} onClick={() => setOpen(false)}
+              className="text-white text-2xl font-black uppercase tracking-tight">
+              {label}
+            </Link>
+          ))}
+          <Link to="/admin" onClick={() => setOpen(false)}
+            className="text-white/40 text-sm font-semibold uppercase tracking-widest">
+            Admin
+          </Link>
+        </div>
+      )}
     </nav>
   );
 }

@@ -18,67 +18,96 @@ export default function Contact() {
   };
 
   return (
-    <main className="pt-16">
-      <div className="max-w-2xl mx-auto px-6 py-20">
-        <div className="text-center mb-14">
-          <p className="text-xs font-semibold tracking-widest text-[#e94560] uppercase mb-2">Contact</p>
-          <h1 className="font-serif text-4xl font-bold text-[#1a1a2e]">연락하기</h1>
-          <p className="text-gray-600 mt-4">
-            궁금한 점이나 협업 제안이 있으시면 편하게 연락 주세요.
-          </p>
+    <main className="bg-[#0a0a0a] text-white min-h-screen">
+      <div className="px-6 md:px-12 pt-32 pb-16 max-w-7xl mx-auto">
+        <div className="border-b border-white/10 pb-12 mb-16">
+          <span className="text-xs font-semibold tracking-[0.3em] text-white/30 uppercase">Get In Touch</span>
+          <h1 className="font-black text-[10vw] tracking-tighter leading-none mt-2">Contact</h1>
         </div>
 
-        {status === 'success' ? (
-          <div className="text-center py-12 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-700 font-medium">메시지가 전송되었습니다. 감사합니다!</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-16">
+          <div>
+            <p className="text-white/40 text-lg leading-relaxed mb-12">
+              궁금한 점이나 협업 제안이 있으시면<br />편하게 연락 주세요.
+            </p>
+            <div className="space-y-6">
+              <div className="border-t border-white/10 pt-6">
+                <span className="text-xs font-semibold tracking-widest text-white/20 uppercase block mb-2">Email</span>
+                <a href="mailto:startea0716@gmail.com" className="text-white hover:text-white/60 transition-colors font-medium">
+                  startea0716@gmail.com
+                </a>
+              </div>
+              <div className="border-t border-white/10 pt-6">
+                <span className="text-xs font-semibold tracking-widest text-white/20 uppercase block mb-2">GitHub</span>
+                <a href="https://github.com/gunobo" target="_blank" rel="noreferrer"
+                  className="text-white hover:text-white/60 transition-colors font-medium">
+                  github.com/gunobo ↗
+                </a>
+              </div>
+            </div>
           </div>
-        ) : (
-          <form onSubmit={handleSubmit} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-[#1a1a2e] mb-2">이름</label>
-              <input
-                type="text"
-                required
-                value={form.name}
-                onChange={e => setForm({ ...form, name: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-[#1a1a2e] transition-colors"
-                placeholder="홍길동"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#1a1a2e] mb-2">이메일</label>
-              <input
-                type="email"
-                required
-                value={form.email}
-                onChange={e => setForm({ ...form, email: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-[#1a1a2e] transition-colors"
-                placeholder="hello@example.com"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-[#1a1a2e] mb-2">메시지</label>
-              <textarea
-                required
-                rows={6}
-                value={form.message}
-                onChange={e => setForm({ ...form, message: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded focus:outline-none focus:border-[#1a1a2e] transition-colors resize-none"
-                placeholder="메시지를 입력해주세요..."
-              />
-            </div>
-            {status === 'error' && (
-              <p className="text-red-500 text-sm">전송에 실패했습니다. 다시 시도해주세요.</p>
+
+          <div>
+            {status === 'success' ? (
+              <div className="border border-white/10 p-12 text-center">
+                <p className="text-white/60 text-sm uppercase tracking-widest mb-2">Sent!</p>
+                <p className="text-white font-semibold">메시지가 전송되었습니다.</p>
+                <button
+                  onClick={() => setStatus('idle')}
+                  className="mt-8 text-xs font-semibold uppercase tracking-widest text-white/40 hover:text-white transition-colors"
+                >
+                  Send Another →
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-0">
+                <div className="border border-white/10 border-b-0 p-6">
+                  <label className="block text-xs font-semibold tracking-widest text-white/30 uppercase mb-3">Name</label>
+                  <input
+                    type="text"
+                    required
+                    value={form.name}
+                    onChange={e => setForm({ ...form, name: e.target.value })}
+                    className="w-full bg-transparent text-white placeholder-white/20 focus:outline-none text-lg font-medium"
+                    placeholder="홍길동"
+                  />
+                </div>
+                <div className="border border-white/10 border-b-0 p-6">
+                  <label className="block text-xs font-semibold tracking-widest text-white/30 uppercase mb-3">Email</label>
+                  <input
+                    type="email"
+                    required
+                    value={form.email}
+                    onChange={e => setForm({ ...form, email: e.target.value })}
+                    className="w-full bg-transparent text-white placeholder-white/20 focus:outline-none text-lg font-medium"
+                    placeholder="hello@example.com"
+                  />
+                </div>
+                <div className="border border-white/10 p-6">
+                  <label className="block text-xs font-semibold tracking-widest text-white/30 uppercase mb-3">Message</label>
+                  <textarea
+                    required
+                    rows={6}
+                    value={form.message}
+                    onChange={e => setForm({ ...form, message: e.target.value })}
+                    className="w-full bg-transparent text-white placeholder-white/20 focus:outline-none text-lg font-medium resize-none"
+                    placeholder="메시지를 입력해주세요..."
+                  />
+                </div>
+                {status === 'error' && (
+                  <p className="text-red-400 text-xs uppercase tracking-widest pt-4">전송 실패. 다시 시도해주세요.</p>
+                )}
+                <button
+                  type="submit"
+                  disabled={status === 'loading'}
+                  className="mt-6 w-full py-5 bg-white text-black text-sm font-black uppercase tracking-widest hover:bg-white/80 disabled:opacity-30 transition-colors"
+                >
+                  {status === 'loading' ? 'Sending...' : 'Send Message →'}
+                </button>
+              </form>
             )}
-            <button
-              type="submit"
-              disabled={status === 'loading'}
-              className="w-full py-3 bg-[#1a1a2e] text-white font-medium rounded hover:bg-[#0f3460] disabled:opacity-50 transition-colors"
-            >
-              {status === 'loading' ? '전송 중...' : '보내기'}
-            </button>
-          </form>
-        )}
+          </div>
+        </div>
       </div>
     </main>
   );

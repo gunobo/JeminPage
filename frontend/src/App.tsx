@@ -9,7 +9,7 @@ import Admin from './pages/Admin';
 export default function App() {
   return (
     <BrowserRouter>
-      <div className="min-h-screen flex flex-col bg-[#f8f8f6]">
+      <div className="min-h-screen flex flex-col bg-[#0a0a0a]">
         <Navbar />
         <div className="flex-1">
           <Routes>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { projectsApi } from '../api';
-import ProjectCard from '../components/ui/ProjectCard';
 import type { Project } from '../types';
 
 export default function Projects() {
@@ -14,28 +13,79 @@ export default function Projects() {
   }, []);
 
   return (
-    <main className="pt-16">
-      <div className="max-w-5xl mx-auto px-6 py-20">
-        <div className="text-center mb-14">
-          <p className="text-xs font-semibold tracking-widest text-[#e94560] uppercase mb-2">Portfolio</p>
-          <h1 className="font-serif text-4xl font-bold text-[#1a1a2e]">프로젝트</h1>
-          <p className="text-gray-600 mt-4 max-w-md mx-auto">
-            개발하면서 만든 프로젝트들을 소개합니다.
-          </p>
+    <main className="bg-[#0a0a0a] text-white min-h-screen">
+      <div className="px-6 md:px-12 pt-32 pb-16 max-w-7xl mx-auto">
+        <div className="border-b border-white/10 pb-12 mb-16">
+          <span className="text-xs font-semibold tracking-[0.3em] text-white/30 uppercase">Portfolio</span>
+          <h1 className="font-black text-[10vw] tracking-tighter leading-none mt-2">Works</h1>
         </div>
 
         {loading ? (
-          <div className="flex justify-center py-20">
-            <div className="w-8 h-8 border-2 border-[#1a1a2e] border-t-transparent rounded-full animate-spin" />
+          <div className="flex justify-center py-32">
+            <div className="w-6 h-6 border border-white/20 border-t-white rounded-full animate-spin" />
           </div>
         ) : projects.length === 0 ? (
-          <div className="text-center py-20 text-gray-400">
-            아직 등록된 프로젝트가 없습니다.
+          <div className="text-center py-32 text-white/20 text-sm uppercase tracking-widest">
+            No projects yet.
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map(project => (
-              <ProjectCard key={project.id} project={project} />
+          <div className="space-y-px bg-white/10">
+            {projects.map((project, i) => (
+              <div key={project.id} className="group bg-[#0a0a0a] grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-0">
+                {/* Thumbnail */}
+                <div className="overflow-hidden h-60 md:h-auto">
+                  {project.thumbnail_url ? (
+                    <img
+                      src={project.thumbnail_url}
+                      alt={project.title}
+                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-white/5 flex items-center justify-center min-h-[200px]">
+                      <span className="text-7xl font-black text-white/10">{String(i + 1).padStart(2, '0')}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Info */}
+                <div className="p-8 md:p-12 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center justify-between mb-6">
+                      <span className="text-xs font-semibold tracking-widest text-white/20 uppercase">
+                        {String(i + 1).padStart(2, '0')}
+                      </span>
+                      {project.is_featured && (
+                        <span className="text-xs font-semibold tracking-widest text-white/30 uppercase border border-white/10 px-3 py-1">
+                          Featured
+                        </span>
+                      )}
+                    </div>
+                    <h2 className="font-black text-3xl md:text-4xl tracking-tight mb-4">{project.title}</h2>
+                    <p className="text-white/40 leading-relaxed mb-8">{project.description}</p>
+                    <div className="flex flex-wrap gap-2">
+                      {project.tech_stack.map(tech => (
+                        <span key={tech} className="text-xs px-3 py-1 border border-white/10 text-white/30">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="flex gap-6 mt-8 pt-8 border-t border-white/10">
+                    {project.github_url && (
+                      <a href={project.github_url} target="_blank" rel="noreferrer"
+                        className="text-xs font-semibold uppercase tracking-widest text-white/40 hover:text-white transition-colors">
+                        GitHub ↗
+                      </a>
+                    )}
+                    {project.demo_url && (
+                      <a href={project.demo_url} target="_blank" rel="noreferrer"
+                        className="text-xs font-semibold uppercase tracking-widest text-white hover:text-white/60 transition-colors">
+                        Live Demo ↗
+                      </a>
+                    )}
+                  </div>
+                </div>
+              </div>
             ))}
           </div>
         )}
