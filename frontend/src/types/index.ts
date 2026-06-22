@@ -29,3 +29,19 @@ export interface VisitorStats {
   total: number;
   today: number;
 }
+
+export interface SkillGroup {
+  category: string;
+  skills: string[];
+}
+
+export interface Profile {
+  name: string;
+  tagline: string;
+  bio: string;
+  github_url: string;
+  email: string;
+  portfolio_url: string;
+  avatar_url: string;
+  skill_groups: SkillGroup[];
+}

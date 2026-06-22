@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Project, ContactForm, ContactMessage, VisitorStats } from '../types';
+import type { Project, ContactForm, ContactMessage, VisitorStats, Profile } from '../types';
 
 const api = axios.create({ baseURL: '/api' });
 
@@ -29,6 +29,11 @@ export const statsApi = {
 
 export const authApi = {
   login: (password: string) => api.post<{ access_token: string }>('/auth/login', { password }).then(r => r.data),
+};
+
+export const profileApi = {
+  get: () => api.get<Profile>('/profile').then(r => r.data),
+  update: (data: Profile) => api.put<Profile>('/profile', data).then(r => r.data),
 };
 
 export const uploadsApi = {
