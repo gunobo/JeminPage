@@ -118,17 +118,10 @@ export default function Home() {
         {/* Top meta */}
         <div className="relative flex justify-between items-start text-[11px] font-semibold tracking-[0.25em] text-white/20 uppercase max-w-7xl mx-auto w-full">
           <span>Portfolio 2026</span>
-          <span>{profile?.tagline || 'Developer & Designer'}</span>
         </div>
 
         {/* Big title */}
         <div className="relative max-w-7xl mx-auto w-full">
-          <p
-            className="text-[11px] font-semibold tracking-[0.35em] text-white/30 uppercase mb-6"
-            style={{ opacity: 1, transform: `translateY(${-scrollY * 0.1}px)` }}
-          >
-            ✦ {profile?.name || 'imjemin'}
-          </p>
           <h1
             className="font-black leading-[0.85] tracking-tighter uppercase"
             style={{
@@ -141,6 +134,12 @@ export default function Home() {
               : <><span className="block">Im</span><span className="block text-white/10">Jemin</span></>
             }
           </h1>
+          {profile?.tagline && (
+            <p className="mt-4 text-white/40 text-lg md:text-2xl font-medium tracking-wide"
+              style={{ transform: `translateY(${scrollY * 0.1}px)` }}>
+              {profile.tagline}
+            </p>
+          )}
           <div className="mt-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <p className="text-white/40 text-base md:text-lg max-w-sm leading-relaxed">
               {profile?.bio || '개발자이자 디자이너로서\n창의적인 디지털 경험을 만듭니다.'}
