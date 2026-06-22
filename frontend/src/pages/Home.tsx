@@ -332,7 +332,7 @@ export default function Home() {
               <FadeUp key={org.id} delay={i * 0.08}>
                 <div className="group bg-[#0a0a0a] flex items-center gap-6 md:gap-10 px-8 py-7 hover:bg-white/[0.02] transition-colors">
                   <img
-                    src={org.logo_url || profile?.avatar_url || ''}
+                    src={org.logo_url || '/favicon.svg'}
                     alt={org.name}
                     className="w-12 h-12 object-cover rounded opacity-60 group-hover:opacity-100 transition-opacity shrink-0"
                   />
