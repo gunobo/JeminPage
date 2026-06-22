@@ -36,12 +36,6 @@ export default function Navbar() {
               {lang === 'ko' ? 'EN' : 'KO'}
             </button>
           </li>
-          <li>
-            <Link to="/admin"
-              className="text-xs font-semibold tracking-widest uppercase text-white opacity-30 hover:opacity-100 transition-opacity">
-              Admin
-            </Link>
-          </li>
         </ul>
 
         <button className="md:hidden text-white opacity-70 hover:opacity-100" onClick={() => setOpen(!open)}>
@@ -63,8 +57,6 @@ export default function Navbar() {
             className="text-white/40 text-sm font-semibold uppercase tracking-widest text-left">
             {lang === 'ko' ? 'English' : '한국어'}
           </button>
-          <Link to="/admin" onClick={() => setOpen(false)}
-            className="text-white/40 text-sm font-semibold uppercase tracking-widest">Admin</Link>
         </div>
       )}
     </nav>

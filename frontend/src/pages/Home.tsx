@@ -50,7 +50,10 @@ export default function Home() {
   useEffect(() => {
     profileApi.get().then(setProfile).catch(() => {});
     projectsApi.list().then(p => setFeatured(p.filter(x => x.is_featured).slice(0, 4)));
-    statsApi.visit();
+    if (!localStorage.getItem('visited')) {
+      statsApi.visit();
+      localStorage.setItem('visited', '1');
+    }
     statsApi.get().then(setStats).catch(() => {});
   }, []);
 
