@@ -31,12 +31,26 @@ export default function Projects() {
           <div className="space-y-px bg-white/10">
             {projects.map((project, i) => (
               <div key={project.id} className="group bg-[#0a0a0a] grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-0">
-                <div className="overflow-hidden h-60 md:h-auto">
+                <div className="flex items-center justify-center p-6 md:p-10 bg-white/[0.02]">
                   {project.thumbnail_url ? (
-                    <img src={project.thumbnail_url} alt={project.title}
-                      className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700" />
+                    <div className="w-full rounded-lg overflow-hidden shadow-2xl ring-1 ring-white/10 transition-all duration-500 group-hover:shadow-white/10 group-hover:ring-white/20 group-hover:-translate-y-1">
+                      {/* 브라우저 크롬 */}
+                      <div className="flex items-center gap-1.5 px-3 h-8 bg-[#1a1a1a] border-b border-white/10 shrink-0">
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#ff5f57]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#febc2e]" />
+                        <span className="w-2.5 h-2.5 rounded-full bg-[#28c840]" />
+                        <div className="flex-1 mx-2 h-4 rounded bg-white/5 text-[10px] text-white/20 flex items-center px-2 truncate">
+                          {project.demo_url || 'imjemin.co.kr'}
+                        </div>
+                      </div>
+                      <img
+                        src={project.thumbnail_url}
+                        alt={project.title}
+                        className="w-full object-cover opacity-70 group-hover:opacity-100 transition-opacity duration-500"
+                      />
+                    </div>
                   ) : (
-                    <div className="w-full h-full bg-white/5 flex items-center justify-center min-h-[200px]">
+                    <div className="w-full min-h-[200px] rounded-lg bg-white/5 ring-1 ring-white/10 flex items-center justify-center">
                       <span className="text-7xl font-black text-white/10">{String(i + 1).padStart(2, '0')}</span>
                     </div>
                   )}
