@@ -3,6 +3,7 @@ from pydantic import BaseModel
 class OrgOut(BaseModel):
     id: int
     name: str
+    institution: str
     role: str
     period: str
     description: str
@@ -14,6 +15,7 @@ class OrgOut(BaseModel):
 
 class OrgCreate(BaseModel):
     name: str
+    institution: str = ""
     role: str = ""
     period: str = ""
     description: str = ""

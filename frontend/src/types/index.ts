@@ -56,6 +56,7 @@ export interface BlogPost {
 export interface Organization {
   id: number;
   name: string;
+  institution: string;
   role: string;
   period: string;
   description: string;

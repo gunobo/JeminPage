@@ -331,9 +331,14 @@ export default function Home() {
                   )}
                   <div className="flex-1 min-w-0">
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-1">
-                      <h3 className="font-black text-lg md:text-xl tracking-tight text-white/80 group-hover:text-white transition-colors">
-                        {org.name}
-                      </h3>
+                      <div>
+                        <h3 className="font-black text-lg md:text-xl tracking-tight text-white/80 group-hover:text-white transition-colors">
+                          {org.name}
+                        </h3>
+                        {org.institution && (
+                          <p className="text-[11px] font-semibold tracking-widest text-white/20 uppercase mt-0.5">{org.institution}</p>
+                        )}
+                      </div>
                       <span className="text-[11px] font-semibold tracking-widest text-white/20 uppercase shrink-0">{org.period}</span>
                     </div>
                     {org.role && (

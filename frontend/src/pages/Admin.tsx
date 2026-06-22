@@ -605,7 +605,7 @@ function BlogTab() {
 // ─── Organizations tab ────────────────────────────────────────────────────────
 
 const EMPTY_ORG: Omit<Organization, 'id'> = {
-  name: '', role: '', period: '', description: '', logo_url: '', link_url: '', order: 0,
+  name: '', institution: '', role: '', period: '', description: '', logo_url: '', link_url: '', order: 0,
 };
 
 function OrganizationsTab() {
@@ -625,8 +625,8 @@ function OrganizationsTab() {
 
   const handleEdit = (o: Organization) => {
     setEditingId(o.id);
-    setForm({ name: o.name, role: o.role, period: o.period, description: o.description,
-      logo_url: o.logo_url, link_url: o.link_url, order: o.order });
+    setForm({ name: o.name, institution: o.institution, role: o.role, period: o.period,
+      description: o.description, logo_url: o.logo_url, link_url: o.link_url, order: o.order });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -644,7 +644,10 @@ function OrganizationsTab() {
         <form onSubmit={handleSubmit} className="space-y-4">
           <input required value={form.name}
             onChange={e => setForm({ ...form, name: e.target.value })}
-            placeholder="조직/동아리 이름 (예: 멋쟁이사자처럼)" className={inputCls} />
+            placeholder="동아리/조직 이름 (예: 멋쟁이사자처럼)" className={inputCls} />
+          <input value={form.institution}
+            onChange={e => setForm({ ...form, institution: e.target.value })}
+            placeholder="소속 기관/학교 (예: 한국외국어대학교, SOFCON)" className={inputCls} />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <input value={form.role}
               onChange={e => setForm({ ...form, role: e.target.value })}
