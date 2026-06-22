@@ -53,6 +53,15 @@ export interface BlogPost {
   updated_at: string;
 }
 
+export interface Certification {
+  id: number;
+  name: string;
+  issuer: string;
+  acquired_date: string | null;
+  credential_url: string;
+  order: number;
+}
+
 export interface Organization {
   id: number;
   name: string;

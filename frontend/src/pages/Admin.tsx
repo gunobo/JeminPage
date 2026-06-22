@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi, organizationsApi } from '../api';
+import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi, organizationsApi, certificationsApi } from '../api';
 import ImageUpload from '../components/ui/ImageUpload';
 import FileUpload from '../components/ui/FileUpload';
-import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost, Organization } from '../types';
+import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost, Organization, Certification } from '../types';
 
 const inputCls = 'w-full bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 focus:outline-none focus:border-white/30 transition-colors text-sm';
 const btnPrimary = 'px-6 py-3 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-white/80 transition-colors';
@@ -602,6 +602,106 @@ function BlogTab() {
   );
 }
 
+// ─── Certifications tab ───────────────────────────────────────────────────────
+
+const EMPTY_CERT: Omit<Certification, 'id'> = {
+  name: '', issuer: '', acquired_date: null, credential_url: '', order: 0,
+};
+
+function CertificationsTab() {
+  const [certs, setCerts] = useState<Certification[]>([]);
+  const [form, setForm] = useState(EMPTY_CERT);
+  const [editingId, setEditingId] = useState<number | null>(null);
+
+  const refresh = () => certificationsApi.list().then(setCerts);
+  useEffect(() => { refresh(); }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (editingId) await certificationsApi.update(editingId, form);
+    else await certificationsApi.create(form);
+    setForm(EMPTY_CERT); setEditingId(null); refresh();
+  };
+
+  const handleEdit = (c: Certification) => {
+    setEditingId(c.id);
+    setForm({ name: c.name, issuer: c.issuer, acquired_date: c.acquired_date,
+      credential_url: c.credential_url, order: c.order });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('삭제하시겠습니까?')) return;
+    await certificationsApi.delete(id); refresh();
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="border border-white/10 p-8">
+        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-6">
+          {editingId ? '자격증 수정' : '자격증 추가'}
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <input required value={form.name}
+            onChange={e => setForm({ ...form, name: e.target.value })}
+            placeholder="자격증 이름 (예: 정보처리기사)" className={inputCls} />
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <input value={form.issuer}
+              onChange={e => setForm({ ...form, issuer: e.target.value })}
+              placeholder="발급 기관 (예: 한국산업인력공단)" className={inputCls} />
+            <input type="date" value={form.acquired_date ?? ''}
+              onChange={e => setForm({ ...form, acquired_date: e.target.value || null })}
+              className={inputCls} />
+          </div>
+          <input value={form.credential_url}
+            onChange={e => setForm({ ...form, credential_url: e.target.value })}
+            placeholder="자격증 링크 (선택)" className={inputCls} />
+          <div className="flex gap-3 pt-2">
+            <button type="submit" className={btnPrimary}>{editingId ? '수정 완료' : '추가하기'}</button>
+            {editingId && (
+              <button type="button" onClick={() => { setEditingId(null); setForm(EMPTY_CERT); }}
+                className={btnSecondary}>취소</button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div className="border border-white/10 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="border-b border-white/10">
+            <tr>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">자격증</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden sm:table-cell">발급 기관</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">취득일</th>
+              <th className="px-4 py-3 text-right text-[11px] font-semibold tracking-widest text-white/20 uppercase">관리</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {certs.map(c => (
+              <tr key={c.id} className="hover:bg-white/[0.02] transition-colors">
+                <td className="px-4 py-3 font-medium text-white/70">{c.name}</td>
+                <td className="px-4 py-3 text-white/30 hidden sm:table-cell">{c.issuer}</td>
+                <td className="px-4 py-3 text-white/30 text-xs">
+                  {c.acquired_date ? new Date(c.acquired_date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' }) : '—'}
+                </td>
+                <td className="px-4 py-3 text-right whitespace-nowrap">
+                  <button onClick={() => handleEdit(c)}
+                    className="text-xs text-white/30 hover:text-white transition-colors mr-4 uppercase tracking-widest">수정</button>
+                  <button onClick={() => handleDelete(c.id)}
+                    className="text-xs text-red-400/50 hover:text-red-400 transition-colors uppercase tracking-widest">삭제</button>
+                </td>
+              </tr>
+            ))}
+            {certs.length === 0 && (
+              <tr><td colSpan={4} className="px-6 py-12 text-center text-white/20 text-xs uppercase tracking-widest">등록된 자격증이 없습니다.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ─── Organizations tab ────────────────────────────────────────────────────────
 
 const EMPTY_ORG: Omit<Organization, 'id'> = {
@@ -723,7 +823,7 @@ function OrganizationsTab() {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-type Tab = 'projects' | 'messages' | 'profile' | 'blog' | 'organizations';
+type Tab = 'projects' | 'messages' | 'profile' | 'blog' | 'organizations' | 'certifications';
 
 function VisitorChart() {
   const [data, setData] = useState<{ date: string; count: number }[]>([]);
@@ -833,7 +933,7 @@ export default function Admin() {
 
         {/* Tabs */}
         <div className="flex gap-0 mb-8 border-b border-white/10">
-          {([['profile', '프로필'], ['projects', '프로젝트'], ['organizations', '활동'], ['blog', '블로그'], ['messages', '메시지']] as [Tab, string][]).map(([t, label]) => (
+          {([['profile', '프로필'], ['projects', '프로젝트'], ['organizations', '활동'], ['certifications', '자격증'], ['blog', '블로그'], ['messages', '메시지']] as [Tab, string][]).map(([t, label]) => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-6 py-3 text-xs font-black uppercase tracking-widest border-b-2 -mb-px transition-colors ${
                 tab === t ? 'border-white text-white' : 'border-transparent text-white/20 hover:text-white/50'
@@ -846,6 +946,7 @@ export default function Admin() {
         {tab === 'profile' && <ProfileTab />}
         {tab === 'projects' && <ProjectsTab />}
         {tab === 'organizations' && <OrganizationsTab />}
+        {tab === 'certifications' && <CertificationsTab />}
         {tab === 'blog' && <BlogTab />}
         {tab === 'messages' && <MessagesTab />}
       </div>

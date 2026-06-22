@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { projectsApi, statsApi, profileApi, organizationsApi } from '../api';
+import { projectsApi, statsApi, profileApi, organizationsApi, certificationsApi } from '../api';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { useLang } from '../context/LanguageContext';
-import type { Project, VisitorStats, Profile, Organization } from '../types';
+import type { Project, VisitorStats, Profile, Organization, Certification } from '../types';
 
 function FadeUp({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
   const { ref, visible } = useScrollAnimation();
@@ -44,6 +44,7 @@ export default function Home() {
   const [stats, setStats] = useState<VisitorStats | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orgs, setOrgs] = useState<Organization[]>([]);
+  const [certs, setCerts] = useState<Certification[]>([]);
   const { t } = useLang();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
@@ -53,6 +54,7 @@ export default function Home() {
   useEffect(() => {
     profileApi.get().then(setProfile).catch(() => {});
     organizationsApi.list().then(setOrgs).catch(() => {});
+    certificationsApi.list().then(setCerts).catch(() => {});
     projectsApi.list().then(p => setFeatured(p.filter(x => x.is_featured).slice(0, 4)));
     if (!localStorage.getItem('visited')) {
       statsApi.visit();
@@ -354,6 +356,47 @@ export default function Home() {
                       ↗
                     </a>
                   )}
+                </div>
+              </FadeUp>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* ── CERTIFICATIONS ── */}
+      {certs.length > 0 && (
+        <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto">
+          <FadeUp>
+            <div className="flex items-end justify-between mb-20">
+              <div>
+                <span className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">Qualifications</span>
+                <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">Certifications</h2>
+              </div>
+            </div>
+          </FadeUp>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-px bg-white/5">
+            {certs.map((cert, i) => (
+              <FadeUp key={cert.id} delay={i * 0.07}>
+                <div className="group bg-[#0a0a0a] p-8 h-full hover:bg-white/[0.03] transition-colors">
+                  <div className="flex flex-col h-full">
+                    <p className="text-[11px] font-semibold tracking-[0.25em] text-white/20 uppercase mb-4">
+                      {cert.acquired_date
+                        ? new Date(cert.acquired_date).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long' })
+                        : '—'}
+                    </p>
+                    <h3 className="font-black text-xl tracking-tight text-white/80 group-hover:text-white transition-colors flex-1">
+                      {cert.name}
+                    </h3>
+                    {cert.issuer && (
+                      <p className="text-xs text-white/30 mt-3">{cert.issuer}</p>
+                    )}
+                    {cert.credential_url && (
+                      <a href={cert.credential_url} target="_blank" rel="noreferrer"
+                        className="mt-4 text-[11px] font-semibold uppercase tracking-widest text-white/20 hover:text-white transition-colors self-start">
+                        확인 ↗
+                      </a>
+                    )}
+                  </div>
                 </div>
               </FadeUp>
             ))}
