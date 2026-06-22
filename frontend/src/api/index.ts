@@ -1,7 +1,10 @@
 import axios from 'axios';
 import type { Project, ContactForm, ContactMessage, VisitorStats, Profile, BlogPost, Organization, Certification } from '../types';
 
-const api = axios.create({ baseURL: '/api' });
+const api = axios.create({
+  baseURL: '/api',
+  headers: { 'X-Requested-From': 'imjemin-frontend' },
+});
 
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
