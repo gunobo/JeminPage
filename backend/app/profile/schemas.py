@@ -4,6 +4,10 @@ class SkillGroup(BaseModel):
     category: str
     skills: list[str]
 
+class YearlyGoal(BaseModel):
+    text: str
+    done: bool = False
+
 class ProfileOut(BaseModel):
     name: str
     tagline: str
@@ -15,6 +19,7 @@ class ProfileOut(BaseModel):
     cv_url: str
     og_image_url: str
     skill_groups: list[SkillGroup]
+    yearly_goals: list[YearlyGoal]
 
     model_config = {"from_attributes": True}
 
@@ -29,3 +34,4 @@ class ProfileUpdate(BaseModel):
     cv_url: str = ""
     og_image_url: str = ""
     skill_groups: list[SkillGroup] = []
+    yearly_goals: list[YearlyGoal] = []

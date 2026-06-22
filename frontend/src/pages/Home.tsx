@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { projectsApi, statsApi, profileApi } from '../api';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
+import { useLang } from '../context/LanguageContext';
 import type { Project, VisitorStats, Profile } from '../types';
 
 function FadeUp({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
@@ -42,6 +43,7 @@ export default function Home() {
   const [featured, setFeatured] = useState<Project[]>([]);
   const [stats, setStats] = useState<VisitorStats | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const { t } = useLang();
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
   const [count, setCount] = useState(0);
@@ -310,10 +312,10 @@ export default function Home() {
         </FadeUp>
         <div className="space-y-px bg-white/5">
           {[
-            { num: '01', title: 'Research', desc: '문제를 정의하고 사용자 요구사항을 분석합니다.' },
-            { num: '02', title: 'Design', desc: 'UI/UX 설계와 프로토타이핑을 통해 최적의 경험을 설계합니다.' },
-            { num: '03', title: 'Develop', desc: '최신 기술 스택으로 안정적이고 빠른 서비스를 구현합니다.' },
-            { num: '04', title: 'Deploy', desc: 'Docker와 클라우드 인프라로 안정적인 배포와 운영을 합니다.' },
+            { num: '01', title: 'Research', desc: t('researchDesc') },
+            { num: '02', title: 'Design', desc: t('designDesc') },
+            { num: '03', title: 'Develop', desc: t('developDesc') },
+            { num: '04', title: 'Deploy', desc: t('deployDesc') },
           ].map(({ num, title, desc }, i) => (
             <SlideIn key={num} from="left" delay={i * 0.1}>
               <div className="group bg-[#0a0a0a] flex items-center gap-12 p-10 hover:bg-white/[0.02] transition-colors cursor-default">
@@ -328,6 +330,38 @@ export default function Home() {
           ))}
         </div>
       </section>
+
+      {/* ── GOALS ── */}
+      {profile?.yearly_goals && profile.yearly_goals.length > 0 && (
+        <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto">
+          <FadeUp>
+            <div className="flex items-end justify-between mb-16">
+              <div>
+                <span className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">{t('goalsYear')}</span>
+                <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">{t('goals')}</h2>
+              </div>
+              <span className="text-[11px] text-white/20 uppercase tracking-widest">
+                {profile.yearly_goals.filter(g => g.done).length} / {profile.yearly_goals.length}
+              </span>
+            </div>
+          </FadeUp>
+          <div className="space-y-px bg-white/5">
+            {profile.yearly_goals.map((goal, i) => (
+              <FadeUp key={i} delay={i * 0.07}>
+                <div className={`bg-[#0a0a0a] flex items-center gap-8 px-8 py-6 group ${goal.done ? 'opacity-40' : ''}`}>
+                  <span className="font-black text-3xl text-white/10 w-10 shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                  <span className={`flex-1 text-lg font-semibold tracking-tight ${goal.done ? 'line-through text-white/30' : 'text-white/70'}`}>
+                    {goal.text}
+                  </span>
+                  <span className={`text-xs font-black uppercase tracking-widest shrink-0 ${goal.done ? 'text-white/30' : 'text-white/10'}`}>
+                    {goal.done ? t('goalDone') : t('goalPending')}
+                  </span>
+                </div>
+              </FadeUp>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* ── CTA ── */}
       <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto text-center">

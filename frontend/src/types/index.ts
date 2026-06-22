@@ -35,6 +35,11 @@ export interface SkillGroup {
   skills: string[];
 }
 
+export interface YearlyGoal {
+  text: string;
+  done: boolean;
+}
+
 export interface BlogPost {
   id: number;
   title: string;
@@ -59,4 +64,5 @@ export interface Profile {
   cv_url: string;
   og_image_url: string;
   skill_groups: SkillGroup[];
+  yearly_goals: YearlyGoal[];
 }

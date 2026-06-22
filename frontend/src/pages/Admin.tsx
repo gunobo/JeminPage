@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi } from '../api';
 import ImageUpload from '../components/ui/ImageUpload';
 import FileUpload from '../components/ui/FileUpload';
-import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost } from '../types';
+import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost, YearlyGoal } from '../types';
 
 const inputCls = 'w-full bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 focus:outline-none focus:border-white/30 transition-colors text-sm';
 const btnPrimary = 'px-6 py-3 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-white/80 transition-colors';
@@ -268,7 +268,7 @@ function MessagesTab() {
 
 const EMPTY_PROFILE: Profile = {
   name: '', tagline: '', bio: '', github_url: '', email: '',
-  portfolio_url: '', avatar_url: '', cv_url: '', og_image_url: '', skill_groups: [],
+  portfolio_url: '', avatar_url: '', cv_url: '', og_image_url: '', skill_groups: [], yearly_goals: [],
 };
 
 function ProfileTab() {
@@ -383,6 +383,38 @@ function ProfileTab() {
                 <button type="button" onClick={() => addSkill(gi)}
                   className="border border-white/10 text-white/40 px-4 hover:border-white/30 hover:text-white transition-colors">+</button>
               </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Goals */}
+      <div className="border border-white/10 p-8">
+        <div className="flex items-center justify-between mb-6">
+          <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">2026 Goals</p>
+          <button type="button"
+            onClick={() => setForm({ ...form, yearly_goals: [...form.yearly_goals, { text: '', done: false }] })}
+            className={btnSecondary}>+ Goal</button>
+        </div>
+        {form.yearly_goals.length === 0 && (
+          <p className="text-xs text-white/20 text-center py-6 uppercase tracking-widest">No goals yet.</p>
+        )}
+        <div className="space-y-3">
+          {form.yearly_goals.map((goal, i) => (
+            <div key={i} className="flex items-center gap-3">
+              <div
+                className={`w-5 h-5 rounded-full border flex-shrink-0 cursor-pointer transition-colors ${goal.done ? 'bg-white border-white' : 'border-white/20 hover:border-white/50'}`}
+                onClick={() => setForm({ ...form, yearly_goals: form.yearly_goals.map((g, idx) => idx === i ? { ...g, done: !g.done } : g) })}
+              />
+              <input
+                value={goal.text}
+                onChange={e => setForm({ ...form, yearly_goals: form.yearly_goals.map((g, idx) => idx === i ? { ...g, text: e.target.value } : g) })}
+                placeholder="목표 입력"
+                className={`${inputCls} flex-1 ${goal.done ? 'line-through text-white/30' : ''}`}
+              />
+              <button type="button"
+                onClick={() => setForm({ ...form, yearly_goals: form.yearly_goals.filter((_, idx) => idx !== i) })}
+                className="text-red-400/40 hover:text-red-400 transition-colors px-2">×</button>
             </div>
           ))}
         </div>
