@@ -12,6 +12,17 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  r => r,
+  err => {
+    if (err.response?.status === 401) {
+      localStorage.removeItem('token');
+      window.dispatchEvent(new Event('auth:logout'));
+    }
+    return Promise.reject(err);
+  }
+);
+
 export const projectsApi = {
   list: () => api.get<Project[]>('/projects').then(r => r.data),
   get: (id: number) => api.get<Project>(`/projects/${id}`).then(r => r.data),

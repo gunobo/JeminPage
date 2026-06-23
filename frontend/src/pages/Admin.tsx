@@ -957,6 +957,12 @@ export default function Admin() {
   const [stats, setStats] = useState<VisitorStats | null>(null);
 
   useEffect(() => {
+    const onLogout = () => setIsLoggedIn(false);
+    window.addEventListener('auth:logout', onLogout);
+    return () => window.removeEventListener('auth:logout', onLogout);
+  }, []);
+
+  useEffect(() => {
     if (isLoggedIn) statsApi.get().then(setStats).catch(() => {});
   }, [isLoggedIn]);
 
