@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { projectsApi } from '../api';
 import { useLang } from '../context/LanguageContext';
 import type { Project } from '../types';
@@ -10,6 +10,7 @@ export default function ProjectDetail() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const { t } = useLang();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!id) return;
@@ -46,10 +47,11 @@ export default function ProjectDetail() {
 
       <div className="px-6 md:px-16 max-w-5xl mx-auto py-16">
         {/* Back */}
-        <Link to="/projects"
-          className="text-[11px] font-semibold uppercase tracking-widest text-white/20 hover:text-white transition-colors mb-12 inline-block">
+        <button onClick={() => navigate(-1)}
+          className="group flex items-center gap-2 text-[11px] font-semibold uppercase tracking-widest text-white/20 hover:text-white transition-colors mb-12">
+          <span className="group-hover:-translate-x-1 transition-transform">←</span>
           {t('back')}
-        </Link>
+        </button>
 
         {/* Title */}
         <div className="border-b border-white/10 pb-12 mb-12">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi, organizationsApi, certificationsApi } from '../api';
 import ImageUpload from '../components/ui/ImageUpload';
 import FileUpload from '../components/ui/FileUpload';
@@ -268,7 +268,7 @@ function MessagesTab() {
 
 const EMPTY_PROFILE: Profile = {
   name: '', tagline: '', bio: '', github_url: '', email: '',
-  portfolio_url: '', avatar_url: '', cv_url: '', og_image_url: '', skill_groups: [], yearly_goals: [], marquee_items: [],
+  portfolio_url: '', avatar_url: '', discord: '', cv_url: '', og_image_url: '', skill_groups: [], yearly_goals: [], marquee_items: [],
 };
 
 function ProfileTab() {
@@ -479,6 +479,7 @@ function BlogTab() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [tagInput, setTagInput] = useState('');
   const [preview, setPreview] = useState(false);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const refresh = () => blogApi.listAll().then(setPosts);
   useEffect(() => { refresh(); }, []);
@@ -511,6 +512,33 @@ function BlogTab() {
 
   const autoSlug = (title: string) =>
     title.toLowerCase().replace(/[^a-z0-9가-힣\s]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim();
+
+  const insertText = (before: string, after = '', placeholder = '') => {
+    const el = textareaRef.current;
+    if (!el) return;
+    const start = el.selectionStart;
+    const end = el.selectionEnd;
+    const selected = form.content.slice(start, end) || placeholder;
+    const newContent = form.content.slice(0, start) + before + selected + after + form.content.slice(end);
+    setForm({ ...form, content: newContent });
+    setTimeout(() => {
+      el.focus();
+      el.setSelectionRange(start + before.length, start + before.length + selected.length);
+    }, 0);
+  };
+
+  const toolbarItems = [
+    { label: 'H1', action: () => insertText('# ', '', '제목') },
+    { label: 'H2', action: () => insertText('## ', '', '소제목') },
+    { label: 'H3', action: () => insertText('### ', '', '소소제목') },
+    { label: 'B', action: () => insertText('**', '**', '굵게') },
+    { label: 'I', action: () => insertText('*', '*', '기울임') },
+    { label: '`', action: () => insertText('`', '`', 'code') },
+    { label: '```', action: () => insertText('```\n', '\n```', 'code block') },
+    { label: '—', action: () => insertText('\n---\n') },
+    { label: '•', action: () => insertText('- ', '', '항목') },
+    { label: '>', action: () => insertText('> ', '', '인용') },
+  ];
 
   return (
     <div className="space-y-6">
@@ -575,10 +603,29 @@ function BlogTab() {
               </div>
             </div>
           ) : (
-            <textarea required rows={18} value={form.content}
-              onChange={e => setForm({ ...form, content: e.target.value })}
-              placeholder={'# 제목\n\n## 소제목\n\n내용을 입력하세요...\n\n- 항목 1\n- 항목 2'}
-              className={`${inputCls} resize-y font-mono text-xs leading-relaxed`} />
+            <div className="border border-white/10">
+              {/* 마크다운 툴바 */}
+              <div className="flex flex-wrap gap-px border-b border-white/10 bg-white/5 p-1">
+                {toolbarItems.map(({ label, action }) => (
+                  <button key={label} type="button" onClick={action}
+                    className="px-3 py-1.5 text-xs font-mono text-white/40 hover:text-white hover:bg-white/10 transition-colors rounded">
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <textarea
+                ref={textareaRef}
+                required rows={20} value={form.content}
+                onChange={e => setForm({ ...form, content: e.target.value })}
+                onKeyDown={e => {
+                  if (e.key === 'Tab') {
+                    e.preventDefault();
+                    insertText('  ');
+                  }
+                }}
+                placeholder={'# 제목\n\n## 소제목\n\n내용을 입력하세요...\n\n- 항목 1\n- 항목 2'}
+                className="w-full bg-transparent text-white placeholder-white/20 px-4 py-3 focus:outline-none resize-y font-mono text-xs leading-relaxed" />
+            </div>
           )}
 
           <label className="flex items-center gap-3 cursor-pointer group">

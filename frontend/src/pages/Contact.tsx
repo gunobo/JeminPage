@@ -49,44 +49,63 @@ export default function Contact() {
 
           <div>
             {status === 'success' ? (
-              <div className="border border-white/10 p-12 text-center">
-                <p className="text-white/60 text-sm uppercase tracking-widest mb-2">Sent!</p>
-                <p className="text-white font-semibold">{t('messageSent')}</p>
-                <p className="text-white/40 text-sm mt-3">{t('emailConfirm')}</p>
+              <div className="border border-white/10 p-12 flex flex-col items-center justify-center text-center gap-6 min-h-[360px]">
+                {/* 체크 애니메이션 */}
+                <div className="w-16 h-16 rounded-full border border-white/20 flex items-center justify-center">
+                  <svg className="w-7 h-7 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"
+                    strokeLinecap="round" strokeLinejoin="round"
+                    style={{ strokeDasharray: 30, strokeDashoffset: 0, animation: 'dash 0.5s ease forwards' }}>
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-white font-black text-xl mb-2">{t('messageSent')}</p>
+                  <p className="text-white/30 text-sm">{t('emailConfirm')}</p>
+                </div>
                 <button onClick={() => setStatus('idle')}
-                  className="mt-8 text-xs font-semibold uppercase tracking-widest text-white/40 hover:text-white transition-colors">
+                  className="mt-4 text-xs font-semibold uppercase tracking-widest text-white/30 hover:text-white transition-colors border border-white/10 px-6 py-3 hover:border-white/30">
                   {t('sendAnother')}
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-0">
-                <div className="border border-white/10 border-b-0 p-6">
-                  <label className="block text-xs font-semibold tracking-widest text-white/30 uppercase mb-3">Name</label>
-                  <input type="text" required value={form.name}
-                    onChange={e => setForm({ ...form, name: e.target.value })}
-                    className="w-full bg-transparent text-white placeholder-white/20 focus:outline-none text-lg font-medium"
-                    placeholder={t('namePlaceholder')} />
-                </div>
-                <div className="border border-white/10 border-b-0 p-6">
-                  <label className="block text-xs font-semibold tracking-widest text-white/30 uppercase mb-3">Email</label>
-                  <input type="email" required value={form.email}
-                    onChange={e => setForm({ ...form, email: e.target.value })}
-                    className="w-full bg-transparent text-white placeholder-white/20 focus:outline-none text-lg font-medium"
-                    placeholder="hello@example.com" />
-                </div>
-                <div className="border border-white/10 p-6">
+                {[
+                  { label: 'Name', type: 'text', key: 'name' as const, placeholder: t('namePlaceholder') },
+                  { label: 'Email', type: 'email', key: 'email' as const, placeholder: 'hello@example.com' },
+                ].map(({ label, type, key, placeholder }) => (
+                  <div key={key}
+                    className="border border-white/10 border-b-0 p-6 focus-within:border-white/30 transition-colors">
+                    <label className="block text-xs font-semibold tracking-widest text-white/30 uppercase mb-3">{label}</label>
+                    <input type={type} required value={form[key]}
+                      onChange={e => setForm({ ...form, [key]: e.target.value })}
+                      className="w-full bg-transparent text-white placeholder-white/20 focus:outline-none text-lg font-medium"
+                      placeholder={placeholder} />
+                  </div>
+                ))}
+                <div className="border border-white/10 p-6 focus-within:border-white/30 transition-colors">
                   <label className="block text-xs font-semibold tracking-widest text-white/30 uppercase mb-3">Message</label>
                   <textarea required rows={6} value={form.message}
                     onChange={e => setForm({ ...form, message: e.target.value })}
                     className="w-full bg-transparent text-white placeholder-white/20 focus:outline-none text-lg font-medium resize-none"
                     placeholder={t('messagePlaceholder')} />
                 </div>
+
                 {status === 'error' && (
-                  <p className="text-red-400 text-xs uppercase tracking-widest pt-4">{t('sendError')}</p>
+                  <p className="text-red-400 text-xs uppercase tracking-widest pt-4 flex items-center gap-2">
+                    <span>✕</span> {t('sendError')}
+                  </p>
                 )}
+
                 <button type="submit" disabled={status === 'loading'}
-                  className="mt-6 w-full py-5 bg-white text-black text-sm font-black uppercase tracking-widest hover:bg-white/80 disabled:opacity-30 transition-colors">
-                  {status === 'loading' ? t('sending') : t('sendMessage')}
+                  className="mt-6 w-full py-5 bg-white text-black text-sm font-black uppercase tracking-widest hover:bg-white/80 disabled:opacity-30 transition-all duration-300 relative overflow-hidden">
+                  {status === 'loading' ? (
+                    <span className="flex items-center justify-center gap-3">
+                      <span className="w-4 h-4 border-2 border-black/30 border-t-black rounded-full animate-spin" />
+                      {t('sending')}
+                    </span>
+                  ) : (
+                    t('sendMessage')
+                  )}
                 </button>
               </form>
             )}

@@ -81,6 +81,7 @@ export interface Profile {
   email: string;
   portfolio_url: string;
   avatar_url: string;
+  discord: string;
   cv_url: string;
   og_image_url: string;
   skill_groups: SkillGroup[];
