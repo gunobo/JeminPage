@@ -12,6 +12,7 @@ class Profile(Base):
     email = Column(String(200), default="")
     portfolio_url = Column(String(500), default="")
     avatar_url = Column(String(500), default="")
+    discord = Column(String(200), default="")
     cv_url = Column(String(500), default="")
     og_image_url = Column(String(500), default="")
     # [{"category": "Backend", "skills": ["Python", "FastAPI"]}]

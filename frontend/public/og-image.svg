@@ -1,0 +1,26 @@
+<svg viewBox="0 0 1200 630" xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
+  <rect width="1200" height="630" fill="#0a0a0a"/>
+
+  <defs>
+    <pattern id="g" width="80" height="80" patternUnits="userSpaceOnUse">
+      <path d="M80 0L0 0 0 80" fill="none" stroke="#ffffff" stroke-width="0.5" opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="630" fill="url(#g)"/>
+
+  <rect x="80" y="80" width="1" height="470" fill="#ffffff" opacity="0.12"/>
+  <rect x="1119" y="80" width="1" height="470" fill="#ffffff" opacity="0.12"/>
+  <rect x="80" y="80" width="1040" height="1" fill="#ffffff" opacity="0.12"/>
+  <rect x="80" y="550" width="1040" height="1" fill="#ffffff" opacity="0.12"/>
+
+  <text x="104" y="136" font-family="Arial, sans-serif" font-size="13" font-weight="600" fill="#ffffff" opacity="0.2" letter-spacing="5">PORTFOLIO · 2026</text>
+
+  <text x="100" y="370" font-family="Arial Black, Impact, sans-serif" font-size="260" font-weight="900" fill="#ffffff" letter-spacing="-8">IM</text>
+  <text x="100" y="540" font-family="Arial Black, Impact, sans-serif" font-size="260" font-weight="900" fill="#ffffff" opacity="0.07" letter-spacing="-8">JEMIN</text>
+
+  <rect x="700" y="260" width="380" height="1" fill="#ffffff" opacity="0.1"/>
+  <text x="700" y="305" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" opacity="0.4" letter-spacing="1">풀스택 개발자</text>
+  <text x="700" y="335" font-family="Arial, sans-serif" font-size="18" fill="#ffffff" opacity="0.4" letter-spacing="1">FastAPI · React · Docker</text>
+  <rect x="700" y="360" width="380" height="1" fill="#ffffff" opacity="0.1"/>
+  <text x="700" y="395" font-family="Arial, sans-serif" font-size="14" fill="#ffffff" opacity="0.2" letter-spacing="3">imjemin.co.kr</text>
+</svg>
