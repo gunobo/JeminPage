@@ -64,9 +64,14 @@ function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const cardW = el.scrollWidth / years.length;
-    el.scrollTo({ left: activeIdx * cardW, behavior: 'smooth' });
-  }, []);
+    const scrollToActive = () => {
+      const cardW = el.scrollWidth / years.length;
+      el.scrollTo({ left: activeIdx * cardW, behavior: 'instant' });
+    };
+    // 렌더 후 DOM 크기 확정되면 스크롤
+    const id = setTimeout(scrollToActive, 50);
+    return () => clearTimeout(id);
+  }, [activeIdx === (years.indexOf(currentYear) >= 0 ? years.indexOf(currentYear) : Math.floor(years.length / 2))]);
 
   return (
     <section className="border-t border-white/10 py-40 overflow-hidden">
