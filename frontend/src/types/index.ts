@@ -38,6 +38,7 @@ export interface SkillGroup {
 export interface YearlyGoal {
   text: string;
   done: boolean;
+  year: number;
 }
 
 export interface BlogPost {

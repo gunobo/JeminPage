@@ -8,6 +8,7 @@ class SkillGroup(BaseModel):
 class YearlyGoal(BaseModel):
     text: str
     done: bool = False
+    year: int = 2026
 
 class ProfileOut(BaseModel):
     name: str
@@ -17,6 +18,7 @@ class ProfileOut(BaseModel):
     email: str
     portfolio_url: str
     avatar_url: str
+    discord: str
     cv_url: str
     og_image_url: str
     skill_groups: list[SkillGroup] = []
@@ -38,6 +40,7 @@ class ProfileUpdate(BaseModel):
     email: str = ""
     portfolio_url: str = ""
     avatar_url: str = ""
+    discord: str = ""
     cv_url: str = ""
     og_image_url: str = ""
     skill_groups: list[SkillGroup] = []
