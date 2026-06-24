@@ -39,6 +39,55 @@ function SlideIn({ children, delay = 0, from = 'left', className = '' }: { child
   );
 }
 
+function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
+  const { t } = useLang();
+  const years = [...new Set(goals.map(g => g.year ?? 2026))].sort((a, b) => b - a);
+  const [selectedYear, setSelectedYear] = useState(years[0]);
+  const yearGoals = goals.filter(g => (g.year ?? 2026) === selectedYear);
+  return (
+    <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto">
+      <FadeUp>
+        <div className="flex items-end justify-between mb-10">
+          <div>
+            <span className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">{t('goalsYear')}</span>
+            <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">{t('goals')}</h2>
+          </div>
+          <span className="text-[11px] text-white/20 uppercase tracking-widest">
+            {yearGoals.filter(g => g.done).length} / {yearGoals.length}
+          </span>
+        </div>
+        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none">
+          {years.map(y => (
+            <button key={y} onClick={() => setSelectedYear(y)}
+              className={`shrink-0 px-5 py-2 text-sm font-black uppercase tracking-widest transition-all duration-200 ${
+                selectedYear === y
+                  ? 'bg-white text-black'
+                  : 'border border-white/10 text-white/30 hover:border-white/30 hover:text-white'
+              }`}>
+              {y}
+            </button>
+          ))}
+        </div>
+      </FadeUp>
+      <div className="space-y-px bg-white/5">
+        {yearGoals.map((goal, i) => (
+          <FadeUp key={`${selectedYear}-${i}`} delay={i * 0.05}>
+            <div className={`bg-[#0a0a0a] flex items-center gap-8 px-8 py-6 ${goal.done ? 'opacity-40' : ''}`}>
+              <span className="font-black text-3xl text-white/10 w-10 shrink-0">{String(i + 1).padStart(2, '0')}</span>
+              <span className={`flex-1 text-lg font-semibold tracking-tight ${goal.done ? 'line-through text-white/30' : 'text-white/70'}`}>
+                {goal.text}
+              </span>
+              <span className={`text-xs font-black uppercase tracking-widest shrink-0 ${goal.done ? 'text-white/30' : 'text-white/10'}`}>
+                {goal.done ? t('goalDone') : t('goalPending')}
+              </span>
+            </div>
+          </FadeUp>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 export default function Home() {
   const [featured, setFeatured] = useState<Project[]>([]);
   const [stats, setStats] = useState<VisitorStats | null>(null);
@@ -437,54 +486,9 @@ export default function Home() {
       </section>
 
       {/* ── GOALS ── */}
-      {profile?.yearly_goals && profile.yearly_goals.length > 0 && (() => {
-        const years = [...new Set(profile.yearly_goals.map(g => g.year ?? 2026))].sort((a, b) => b - a);
-        const [selectedYear, setSelectedYear] = useState(years[0]);
-        const yearGoals = profile.yearly_goals.filter(g => (g.year ?? 2026) === selectedYear);
-        return (
-          <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto">
-            <FadeUp>
-              <div className="flex items-end justify-between mb-10">
-                <div>
-                  <span className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">{t('goalsYear')}</span>
-                  <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">{t('goals')}</h2>
-                </div>
-                <span className="text-[11px] text-white/20 uppercase tracking-widest">
-                  {yearGoals.filter(g => g.done).length} / {yearGoals.length}
-                </span>
-              </div>
-              {/* 연도 탭 */}
-              <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none">
-                {years.map(y => (
-                  <button key={y} onClick={() => setSelectedYear(y)}
-                    className={`shrink-0 px-5 py-2 text-sm font-black uppercase tracking-widest transition-all duration-200 ${
-                      selectedYear === y
-                        ? 'bg-white text-black'
-                        : 'border border-white/10 text-white/30 hover:border-white/30 hover:text-white'
-                    }`}>
-                    {y}
-                  </button>
-                ))}
-              </div>
-            </FadeUp>
-            <div className="space-y-px bg-white/5">
-              {yearGoals.map((goal, i) => (
-                <FadeUp key={`${selectedYear}-${i}`} delay={i * 0.05}>
-                  <div className={`bg-[#0a0a0a] flex items-center gap-8 px-8 py-6 ${goal.done ? 'opacity-40' : ''}`}>
-                    <span className="font-black text-3xl text-white/10 w-10 shrink-0">{String(i + 1).padStart(2, '0')}</span>
-                    <span className={`flex-1 text-lg font-semibold tracking-tight ${goal.done ? 'line-through text-white/30' : 'text-white/70'}`}>
-                      {goal.text}
-                    </span>
-                    <span className={`text-xs font-black uppercase tracking-widest shrink-0 ${goal.done ? 'text-white/30' : 'text-white/10'}`}>
-                      {goal.done ? t('goalDone') : t('goalPending')}
-                    </span>
-                  </div>
-                </FadeUp>
-              ))}
-            </div>
-          </section>
-        );
-      })()}
+      {profile?.yearly_goals && profile.yearly_goals.length > 0 && (
+        <GoalsSection goals={profile.yearly_goals} />
+      )}
 
       {/* ── CTA ── */}
       <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto text-center">
