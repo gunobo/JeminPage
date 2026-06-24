@@ -43,64 +43,96 @@ function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
   const { t } = useLang();
   const years = [...new Set(goals.map(g => g.year ?? 2026))].sort((a, b) => a - b);
   const currentYear = new Date().getFullYear();
+  const [activeIdx, setActiveIdx] = useState(() => {
+    const ci = years.indexOf(currentYear);
+    return ci >= 0 ? ci : Math.floor(years.length / 2);
+  });
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const onScroll = () => {
+      const cardW = el.scrollWidth / years.length;
+      const idx = Math.round(el.scrollLeft / cardW);
+      setActiveIdx(Math.max(0, Math.min(idx, years.length - 1)));
+    };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => el.removeEventListener('scroll', onScroll);
+  }, [years.length]);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const cardW = el.scrollWidth / years.length;
+    el.scrollTo({ left: activeIdx * cardW, behavior: 'smooth' });
+  }, []);
+
   return (
-    <section className="border-t border-white/10 py-40">
+    <section className="border-t border-white/10 py-40 overflow-hidden">
       <FadeUp>
         <div className="px-6 md:px-16 max-w-7xl mx-auto mb-12">
           <span className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">{t('goalsYear')}</span>
           <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">{t('goals')}</h2>
         </div>
       </FadeUp>
-      <div className="flex gap-6 overflow-x-auto px-6 md:px-16 pb-6 scrollbar-none">
-        {years.map((year, cardIdx) => {
+
+      <div
+        ref={scrollRef}
+        className="flex overflow-x-auto scrollbar-none"
+        style={{ scrollSnapType: 'x mandatory', paddingLeft: 'calc(50vw - 180px)', paddingRight: 'calc(50vw - 180px)', gap: '24px' }}
+      >
+        {years.map((year, i) => {
           const yearGoals = goals.filter(g => (g.year ?? 2026) === year);
           const done = yearGoals.filter(g => g.done).length;
           const pct = yearGoals.length > 0 ? Math.round((done / yearGoals.length) * 100) : 0;
-          const isCurrent = year === currentYear;
+          const isActive = i === activeIdx;
           return (
             <div
               key={year}
-              className="flex-shrink-0 min-w-[280px] md:min-w-[320px] border p-8 flex flex-col gap-6 transition-all duration-500 cursor-default"
+              onClick={() => setActiveIdx(i)}
+              className="flex-shrink-0 flex flex-col gap-5 border p-8 cursor-pointer"
               style={{
-                borderColor: isCurrent ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)',
-                background: isCurrent ? 'rgba(255,255,255,0.04)' : 'transparent',
-                opacity: 0,
-                transform: 'translateY(30px)',
-                animation: `fadeSlideUp 0.6s ease ${cardIdx * 0.12}s forwards`,
+                scrollSnapAlign: 'center',
+                width: '360px',
+                minHeight: '320px',
+                borderColor: isActive ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.06)',
+                background: isActive ? 'rgba(255,255,255,0.03)' : 'transparent',
+                transform: isActive ? 'scale(1)' : 'scale(0.82)',
+                opacity: isActive ? 1 : 0.35,
+                transition: 'transform 0.4s ease, opacity 0.4s ease, border-color 0.4s ease',
               }}
-              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-6px)'; (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.4)'; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.borderColor = isCurrent ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)'; }}
             >
-              <div className="flex items-start justify-between">
-                <div>
-                  <span className="font-black text-4xl tracking-tighter">{year}</span>
-                  {isCurrent && <span className="ml-2 text-[10px] font-black uppercase tracking-widest text-white/30">Now</span>}
-                </div>
-                <span className="text-[11px] font-black text-white/20 tracking-widest">{done}/{yearGoals.length}</span>
+              <div className="flex items-center justify-between">
+                <span className="font-black text-5xl tracking-tighter">{year}</span>
+                {year === currentYear && <span className="text-[10px] font-black uppercase tracking-widest text-white/30 border border-white/10 px-2 py-1">Now</span>}
               </div>
-              {/* 진행도 바 */}
               <div className="h-px bg-white/10 w-full overflow-hidden">
-                <div
-                  className="h-full bg-white/50 transition-all duration-1000"
-                  style={{ width: `${pct}%` }}
-                />
+                <div className="h-full bg-white/50 transition-all duration-1000" style={{ width: `${pct}%` }} />
               </div>
               <div className="space-y-3 flex-1">
-                {yearGoals.map((goal, i) => (
-                  <div key={i} className={`flex items-start gap-3 transition-opacity duration-300 ${goal.done ? 'opacity-30' : 'opacity-100'}`}>
-                    <span className={`w-1.5 h-1.5 mt-1.5 rounded-full shrink-0 ${goal.done ? 'bg-white/40' : 'bg-white/20'}`} />
-                    <span className={`text-sm leading-relaxed ${goal.done ? 'line-through text-white/30' : 'text-white/60'}`}>
-                      {goal.text}
-                    </span>
+                {yearGoals.map((goal, gi) => (
+                  <div key={gi} className={`flex items-start gap-3 ${goal.done ? 'opacity-30' : ''}`}>
+                    <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-white/20 shrink-0" />
+                    <span className={`text-sm leading-relaxed ${goal.done ? 'line-through text-white/30' : 'text-white/60'}`}>{goal.text}</span>
                   </div>
                 ))}
               </div>
-              <div className="text-[11px] font-black text-white/20 uppercase tracking-widest">{pct}% complete</div>
+              <div className="text-[11px] font-black text-white/20 uppercase tracking-widest">{done}/{yearGoals.length} · {pct}%</div>
             </div>
           );
         })}
       </div>
-      <style>{`@keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }`}</style>
+
+      {/* 도트 인디케이터 */}
+      <div className="flex justify-center gap-2 mt-8">
+        {years.map((_, i) => (
+          <button key={i} onClick={() => setActiveIdx(i)}
+            className="transition-all duration-300"
+            style={{ width: i === activeIdx ? '24px' : '6px', height: '6px', borderRadius: '3px', background: i === activeIdx ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.15)' }}
+          />
+        ))}
+      </div>
     </section>
   );
 }
