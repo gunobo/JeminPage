@@ -32,7 +32,9 @@ export const projectsApi = {
 };
 
 export const contactApi = {
-  send: (data: ContactForm) => api.post('/contact', data),
+  sendOtp: (email: string) => api.post('/contact/otp/send', { email }),
+  verifyOtp: (email: string, otp: string) => api.post<{ verified_token: string }>('/contact/otp/verify', { email, otp }).then(r => r.data),
+  send: (data: ContactForm & { verified_token: string }) => api.post('/contact', data),
   listMessages: () => api.get<ContactMessage[]>('/contact/messages').then(r => r.data),
   markRead: (id: number) => api.patch(`/contact/messages/${id}/read`),
   deleteMessage: (id: number) => api.delete(`/contact/messages/${id}`),
