@@ -42,6 +42,7 @@ function SlideIn({ children, delay = 0, from = 'left', className = '' }: { child
 function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
   const { t } = useLang();
   const years = [...new Set(goals.map(g => g.year ?? 2026))].sort((a, b) => a - b);
+  const currentYear = new Date().getFullYear();
   return (
     <section className="border-t border-white/10 py-40">
       <FadeUp>
@@ -50,30 +51,56 @@ function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
           <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">{t('goals')}</h2>
         </div>
       </FadeUp>
-      <div className="flex gap-4 overflow-x-auto px-6 md:px-16 pb-4 scrollbar-none">
-        {years.map(year => {
+      <div className="flex gap-6 overflow-x-auto px-6 md:px-16 pb-6 scrollbar-none">
+        {years.map((year, cardIdx) => {
           const yearGoals = goals.filter(g => (g.year ?? 2026) === year);
           const done = yearGoals.filter(g => g.done).length;
+          const pct = yearGoals.length > 0 ? Math.round((done / yearGoals.length) * 100) : 0;
+          const isCurrent = year === currentYear;
           return (
-            <div key={year} className="border border-white/10 p-8 min-w-[300px] flex-shrink-0 hover:border-white/20 transition-colors">
-              <div className="flex items-center justify-between mb-6">
-                <span className="font-black text-2xl tracking-tight">{year}</span>
-                <span className="text-[11px] text-white/20 uppercase tracking-widest">{done} / {yearGoals.length}</span>
+            <div
+              key={year}
+              className="flex-shrink-0 min-w-[280px] md:min-w-[320px] border p-8 flex flex-col gap-6 transition-all duration-500 cursor-default"
+              style={{
+                borderColor: isCurrent ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)',
+                background: isCurrent ? 'rgba(255,255,255,0.04)' : 'transparent',
+                opacity: 0,
+                transform: 'translateY(30px)',
+                animation: `fadeSlideUp 0.6s ease ${cardIdx * 0.12}s forwards`,
+              }}
+              onMouseEnter={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(-6px)'; (e.currentTarget as HTMLDivElement).style.borderColor = 'rgba(255,255,255,0.4)'; }}
+              onMouseLeave={e => { (e.currentTarget as HTMLDivElement).style.transform = 'translateY(0)'; (e.currentTarget as HTMLDivElement).style.borderColor = isCurrent ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.08)'; }}
+            >
+              <div className="flex items-start justify-between">
+                <div>
+                  <span className="font-black text-4xl tracking-tighter">{year}</span>
+                  {isCurrent && <span className="ml-2 text-[10px] font-black uppercase tracking-widest text-white/30">Now</span>}
+                </div>
+                <span className="text-[11px] font-black text-white/20 tracking-widest">{done}/{yearGoals.length}</span>
               </div>
-              <div className="space-y-4">
+              {/* 진행도 바 */}
+              <div className="h-px bg-white/10 w-full overflow-hidden">
+                <div
+                  className="h-full bg-white/50 transition-all duration-1000"
+                  style={{ width: `${pct}%` }}
+                />
+              </div>
+              <div className="space-y-3 flex-1">
                 {yearGoals.map((goal, i) => (
-                  <div key={i} className={`flex items-start gap-3 ${goal.done ? 'opacity-40' : ''}`}>
-                    <span className="w-1 h-1 mt-2.5 bg-white/20 rounded-full shrink-0" />
+                  <div key={i} className={`flex items-start gap-3 transition-opacity duration-300 ${goal.done ? 'opacity-30' : 'opacity-100'}`}>
+                    <span className={`w-1.5 h-1.5 mt-1.5 rounded-full shrink-0 ${goal.done ? 'bg-white/40' : 'bg-white/20'}`} />
                     <span className={`text-sm leading-relaxed ${goal.done ? 'line-through text-white/30' : 'text-white/60'}`}>
                       {goal.text}
                     </span>
                   </div>
                 ))}
               </div>
+              <div className="text-[11px] font-black text-white/20 uppercase tracking-widest">{pct}% complete</div>
             </div>
           );
         })}
       </div>
+      <style>{`@keyframes fadeSlideUp { to { opacity: 1; transform: translateY(0); } }`}</style>
     </section>
   );
 }
