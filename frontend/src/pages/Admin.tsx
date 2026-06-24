@@ -423,20 +423,16 @@ function ProfileTab() {
       <div className="border border-white/10 p-8">
         <div className="flex items-center justify-between mb-6">
           <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">Goals</p>
-          <div className="flex gap-2">
-            {[...new Set([...form.yearly_goals.map(g => g.year ?? new Date().getFullYear()), new Date().getFullYear(), new Date().getFullYear() + 1])].sort((a,b) => b-a).slice(0,3).map(y => (
-              <button key={y} type="button"
-                onClick={() => setForm({ ...form, yearly_goals: [...form.yearly_goals, { text: '', done: false, year: y }] })}
-                className={`${btnSecondary} text-xs`}>+ {y}</button>
-            ))}
-          </div>
+          <button type="button"
+            onClick={() => setForm({ ...form, yearly_goals: [...form.yearly_goals, { text: '', done: false, year: new Date().getFullYear() }] })}
+            className={btnSecondary}>+ Goal</button>
         </div>
         {form.yearly_goals.length === 0 && (
           <p className="text-xs text-white/20 text-center py-6 uppercase tracking-widest">아직 목표가 없습니다.</p>
         )}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...new Set(form.yearly_goals.map(g => g.year ?? new Date().getFullYear()))].sort((a,b) => b-a).map(year => (
-            <div key={year} className="border border-white/10 p-4">
+        <div className="flex gap-4 overflow-x-auto pb-2">
+          {[...new Set(form.yearly_goals.map(g => g.year ?? new Date().getFullYear()))].sort((a,b) => a-b).map(year => (
+            <div key={year} className="border border-white/10 p-4 min-w-[260px] flex-shrink-0">
               <p className="text-xs font-black tracking-widest text-white/40 uppercase mb-3">{year}</p>
               <div className="space-y-2">
                 {form.yearly_goals.map((goal, i) => (goal.year ?? new Date().getFullYear()) !== year ? null : (
@@ -456,6 +452,9 @@ function ProfileTab() {
                       className="text-red-400/40 hover:text-red-400 transition-colors">×</button>
                   </div>
                 ))}
+                <button type="button"
+                  onClick={() => setForm({ ...form, yearly_goals: [...form.yearly_goals, { text: '', done: false, year }] })}
+                  className="text-xs text-white/20 hover:text-white/50 transition-colors mt-1">+ 추가</button>
               </div>
             </div>
           ))}

@@ -41,48 +41,38 @@ function SlideIn({ children, delay = 0, from = 'left', className = '' }: { child
 
 function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
   const { t } = useLang();
-  const years = [...new Set(goals.map(g => g.year ?? 2026))].sort((a, b) => b - a);
-  const [selectedYear, setSelectedYear] = useState(years[0]);
-  const yearGoals = goals.filter(g => (g.year ?? 2026) === selectedYear);
+  const years = [...new Set(goals.map(g => g.year ?? 2026))].sort((a, b) => a - b);
   return (
-    <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto">
+    <section className="border-t border-white/10 py-40">
       <FadeUp>
-        <div className="flex items-end justify-between mb-10">
-          <div>
-            <span className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">{t('goalsYear')}</span>
-            <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">{t('goals')}</h2>
-          </div>
-          <span className="text-[11px] text-white/20 uppercase tracking-widest">
-            {yearGoals.filter(g => g.done).length} / {yearGoals.length}
-          </span>
-        </div>
-        <div className="flex gap-2 mb-8 overflow-x-auto pb-2 scrollbar-none">
-          {years.map(y => (
-            <button key={y} onClick={() => setSelectedYear(y)}
-              className={`shrink-0 px-5 py-2 text-sm font-black uppercase tracking-widest transition-all duration-200 ${
-                selectedYear === y
-                  ? 'bg-white text-black'
-                  : 'border border-white/10 text-white/30 hover:border-white/30 hover:text-white'
-              }`}>
-              {y}
-            </button>
-          ))}
+        <div className="px-6 md:px-16 max-w-7xl mx-auto mb-12">
+          <span className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">{t('goalsYear')}</span>
+          <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">{t('goals')}</h2>
         </div>
       </FadeUp>
-      <div className="space-y-px bg-white/5">
-        {yearGoals.map((goal, i) => (
-          <FadeUp key={`${selectedYear}-${i}`} delay={i * 0.05}>
-            <div className={`bg-[#0a0a0a] flex items-center gap-8 px-8 py-6 ${goal.done ? 'opacity-40' : ''}`}>
-              <span className="font-black text-3xl text-white/10 w-10 shrink-0">{String(i + 1).padStart(2, '0')}</span>
-              <span className={`flex-1 text-lg font-semibold tracking-tight ${goal.done ? 'line-through text-white/30' : 'text-white/70'}`}>
-                {goal.text}
-              </span>
-              <span className={`text-xs font-black uppercase tracking-widest shrink-0 ${goal.done ? 'text-white/30' : 'text-white/10'}`}>
-                {goal.done ? t('goalDone') : t('goalPending')}
-              </span>
+      <div className="flex gap-4 overflow-x-auto px-6 md:px-16 pb-4 scrollbar-none">
+        {years.map(year => {
+          const yearGoals = goals.filter(g => (g.year ?? 2026) === year);
+          const done = yearGoals.filter(g => g.done).length;
+          return (
+            <div key={year} className="border border-white/10 p-8 min-w-[300px] flex-shrink-0 hover:border-white/20 transition-colors">
+              <div className="flex items-center justify-between mb-6">
+                <span className="font-black text-2xl tracking-tight">{year}</span>
+                <span className="text-[11px] text-white/20 uppercase tracking-widest">{done} / {yearGoals.length}</span>
+              </div>
+              <div className="space-y-4">
+                {yearGoals.map((goal, i) => (
+                  <div key={i} className={`flex items-start gap-3 ${goal.done ? 'opacity-40' : ''}`}>
+                    <span className="w-1 h-1 mt-2.5 bg-white/20 rounded-full shrink-0" />
+                    <span className={`text-sm leading-relaxed ${goal.done ? 'line-through text-white/30' : 'text-white/60'}`}>
+                      {goal.text}
+                    </span>
+                  </div>
+                ))}
+              </div>
             </div>
-          </FadeUp>
-        ))}
+          );
+        })}
       </div>
     </section>
   );
