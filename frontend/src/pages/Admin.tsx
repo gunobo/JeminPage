@@ -423,36 +423,40 @@ function ProfileTab() {
       <div className="border border-white/10 p-8">
         <div className="flex items-center justify-between mb-6">
           <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">Goals</p>
-          <button type="button"
-            onClick={() => setForm({ ...form, yearly_goals: [...form.yearly_goals, { text: '', done: false, year: new Date().getFullYear() }] })}
-            className={btnSecondary}>+ Goal</button>
+          <div className="flex gap-2">
+            {[...new Set([...form.yearly_goals.map(g => g.year ?? new Date().getFullYear()), new Date().getFullYear(), new Date().getFullYear() + 1])].sort((a,b) => b-a).slice(0,3).map(y => (
+              <button key={y} type="button"
+                onClick={() => setForm({ ...form, yearly_goals: [...form.yearly_goals, { text: '', done: false, year: y }] })}
+                className={`${btnSecondary} text-xs`}>+ {y}</button>
+            ))}
+          </div>
         </div>
         {form.yearly_goals.length === 0 && (
           <p className="text-xs text-white/20 text-center py-6 uppercase tracking-widest">아직 목표가 없습니다.</p>
         )}
-        <div className="space-y-3">
-          {form.yearly_goals.map((goal, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <div
-                className={`w-5 h-5 rounded-full border flex-shrink-0 cursor-pointer transition-colors ${goal.done ? 'bg-white border-white' : 'border-white/20 hover:border-white/50'}`}
-                onClick={() => setForm({ ...form, yearly_goals: form.yearly_goals.map((g, idx) => idx === i ? { ...g, done: !g.done } : g) })}
-              />
-              <input
-                type="number"
-                value={goal.year ?? new Date().getFullYear()}
-                onChange={e => setForm({ ...form, yearly_goals: form.yearly_goals.map((g, idx) => idx === i ? { ...g, year: Number(e.target.value) } : g) })}
-                className={`${inputCls} w-24 text-center`}
-                min="2020" max="2099"
-              />
-              <input
-                value={goal.text}
-                onChange={e => setForm({ ...form, yearly_goals: form.yearly_goals.map((g, idx) => idx === i ? { ...g, text: e.target.value } : g) })}
-                placeholder="목표 입력"
-                className={`${inputCls} flex-1 ${goal.done ? 'line-through text-white/30' : ''}`}
-              />
-              <button type="button"
-                onClick={() => setForm({ ...form, yearly_goals: form.yearly_goals.filter((_, idx) => idx !== i) })}
-                className="text-red-400/40 hover:text-red-400 transition-colors px-2">×</button>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[...new Set(form.yearly_goals.map(g => g.year ?? new Date().getFullYear()))].sort((a,b) => b-a).map(year => (
+            <div key={year} className="border border-white/10 p-4">
+              <p className="text-xs font-black tracking-widest text-white/40 uppercase mb-3">{year}</p>
+              <div className="space-y-2">
+                {form.yearly_goals.map((goal, i) => (goal.year ?? new Date().getFullYear()) !== year ? null : (
+                  <div key={i} className="flex items-center gap-2">
+                    <div
+                      className={`w-4 h-4 rounded-full border flex-shrink-0 cursor-pointer transition-colors ${goal.done ? 'bg-white border-white' : 'border-white/20 hover:border-white/50'}`}
+                      onClick={() => setForm({ ...form, yearly_goals: form.yearly_goals.map((g, idx) => idx === i ? { ...g, done: !g.done } : g) })}
+                    />
+                    <input
+                      value={goal.text}
+                      onChange={e => setForm({ ...form, yearly_goals: form.yearly_goals.map((g, idx) => idx === i ? { ...g, text: e.target.value } : g) })}
+                      placeholder="목표 입력"
+                      className={`${inputCls} flex-1 text-sm ${goal.done ? 'line-through text-white/30' : ''}`}
+                    />
+                    <button type="button"
+                      onClick={() => setForm({ ...form, yearly_goals: form.yearly_goals.filter((_, idx) => idx !== i) })}
+                      className="text-red-400/40 hover:text-red-400 transition-colors">×</button>
+                  </div>
+                ))}
+              </div>
             </div>
           ))}
         </div>
