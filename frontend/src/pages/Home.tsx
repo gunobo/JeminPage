@@ -47,65 +47,75 @@ function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
     const ci = years.indexOf(currentYear);
     return ci >= 0 ? ci : Math.floor(years.length / 2);
   });
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const dragStartX = useRef<number | null>(null);
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const onScroll = () => {
-      const cardW = el.scrollWidth / years.length;
-      const idx = Math.round(el.scrollLeft / cardW);
-      setActiveIdx(Math.max(0, Math.min(idx, years.length - 1)));
-    };
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => el.removeEventListener('scroll', onScroll);
-  }, [years.length]);
+  const prev = () => setActiveIdx(i => Math.max(0, i - 1));
+  const next = () => setActiveIdx(i => Math.min(years.length - 1, i + 1));
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const scrollToActive = () => {
-      const cardW = el.scrollWidth / years.length;
-      el.scrollTo({ left: activeIdx * cardW, behavior: 'instant' });
+  const getStyle = (i: number) => {
+    const offset = i - activeIdx;
+    const absOff = Math.abs(offset);
+    if (absOff > 2) return { display: 'none' };
+    const scale = absOff === 0 ? 1 : absOff === 1 ? 0.78 : 0.62;
+    const translateX = offset * 72; // % overlap
+    const opacity = absOff === 0 ? 1 : absOff === 1 ? 0.5 : 0.2;
+    const zIndex = 10 - absOff;
+    return {
+      transform: `translateX(${translateX}%) scale(${scale})`,
+      opacity,
+      zIndex,
+      transition: 'transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease',
     };
-    // 렌더 후 DOM 크기 확정되면 스크롤
-    const id = setTimeout(scrollToActive, 50);
-    return () => clearTimeout(id);
-  }, [activeIdx === (years.indexOf(currentYear) >= 0 ? years.indexOf(currentYear) : Math.floor(years.length / 2))]);
+  };
 
   return (
     <section className="border-t border-white/10 py-40 overflow-hidden">
       <FadeUp>
-        <div className="px-6 md:px-16 max-w-7xl mx-auto mb-12">
+        <div className="px-6 md:px-16 max-w-7xl mx-auto mb-16">
           <span className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">{t('goalsYear')}</span>
           <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">{t('goals')}</h2>
         </div>
       </FadeUp>
 
+      {/* 캐러셀 */}
       <div
-        ref={scrollRef}
-        className="flex overflow-x-auto scrollbar-none"
-        style={{ scrollSnapType: 'x mandatory', paddingLeft: 'calc(50vw - 180px)', paddingRight: 'calc(50vw - 180px)', gap: '24px' }}
+        className="relative flex items-center justify-center"
+        style={{ height: '420px' }}
+        onMouseDown={e => { dragStartX.current = e.clientX; }}
+        onMouseUp={e => {
+          if (dragStartX.current === null) return;
+          const diff = dragStartX.current - e.clientX;
+          if (diff > 40) next();
+          else if (diff < -40) prev();
+          dragStartX.current = null;
+        }}
+        onTouchStart={e => { dragStartX.current = e.touches[0].clientX; }}
+        onTouchEnd={e => {
+          if (dragStartX.current === null) return;
+          const diff = dragStartX.current - e.changedTouches[0].clientX;
+          if (diff > 40) next();
+          else if (diff < -40) prev();
+          dragStartX.current = null;
+        }}
       >
         {years.map((year, i) => {
           const yearGoals = goals.filter(g => (g.year ?? 2026) === year);
           const done = yearGoals.filter(g => g.done).length;
           const pct = yearGoals.length > 0 ? Math.round((done / yearGoals.length) * 100) : 0;
           const isActive = i === activeIdx;
+          const style = getStyle(i);
+          if (style.display === 'none') return null;
           return (
             <div
               key={year}
               onClick={() => setActiveIdx(i)}
-              className="flex-shrink-0 flex flex-col gap-5 border p-8 cursor-pointer"
+              className="absolute flex flex-col gap-5 border p-8 cursor-pointer select-none"
               style={{
-                scrollSnapAlign: 'center',
-                width: '360px',
-                minHeight: '320px',
-                borderColor: isActive ? 'rgba(255,255,255,0.3)' : 'rgba(255,255,255,0.06)',
-                background: isActive ? 'rgba(255,255,255,0.03)' : 'transparent',
-                transform: isActive ? 'scale(1)' : 'scale(0.82)',
-                opacity: isActive ? 1 : 0.35,
-                transition: 'transform 0.4s ease, opacity 0.4s ease, border-color 0.4s ease',
+                width: '340px',
+                minHeight: '360px',
+                borderColor: isActive ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.06)',
+                background: isActive ? 'rgba(255,255,255,0.04)' : '#0a0a0a',
+                ...style,
               }}
             >
               <div className="flex items-center justify-between">
@@ -113,7 +123,7 @@ function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
                 {year === currentYear && <span className="text-[10px] font-black uppercase tracking-widest text-white/30 border border-white/10 px-2 py-1">Now</span>}
               </div>
               <div className="h-px bg-white/10 w-full overflow-hidden">
-                <div className="h-full bg-white/50 transition-all duration-1000" style={{ width: `${pct}%` }} />
+                <div className="h-full bg-white/40 transition-all duration-1000" style={{ width: `${pct}%` }} />
               </div>
               <div className="space-y-3 flex-1">
                 {yearGoals.map((goal, gi) => (
@@ -129,14 +139,20 @@ function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
         })}
       </div>
 
-      {/* 도트 인디케이터 */}
-      <div className="flex justify-center gap-2 mt-8">
-        {years.map((_, i) => (
-          <button key={i} onClick={() => setActiveIdx(i)}
-            className="transition-all duration-300"
-            style={{ width: i === activeIdx ? '24px' : '6px', height: '6px', borderRadius: '3px', background: i === activeIdx ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.15)' }}
-          />
-        ))}
+      {/* 화살표 + 도트 */}
+      <div className="flex items-center justify-center gap-6 mt-8">
+        <button onClick={prev} disabled={activeIdx === 0}
+          className="text-white/20 hover:text-white disabled:opacity-10 transition-colors text-xl">←</button>
+        <div className="flex gap-2">
+          {years.map((_, i) => (
+            <button key={i} onClick={() => setActiveIdx(i)}
+              className="transition-all duration-300"
+              style={{ width: i === activeIdx ? '24px' : '6px', height: '6px', borderRadius: '3px', background: i === activeIdx ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.15)' }}
+            />
+          ))}
+        </div>
+        <button onClick={next} disabled={activeIdx === years.length - 1}
+          className="text-white/20 hover:text-white disabled:opacity-10 transition-colors text-xl">→</button>
       </div>
     </section>
   );
