@@ -8,7 +8,7 @@ from .schemas import ContactForm
 SENDER = "portfolio@imjemin.co.kr"
 
 def _send_local(msg: MIMEText):
-    with smtplib.SMTP("localhost", 25) as s:
+    with smtplib.SMTP("host.docker.internal", 25) as s:
         s.send_message(msg)
 
 def send_otp_email(email: str, otp: str):
