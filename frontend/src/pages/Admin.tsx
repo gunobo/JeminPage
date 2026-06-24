@@ -424,8 +424,14 @@ function ProfileTab() {
         <div className="flex items-center justify-between mb-6">
           <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">Goals</p>
           <button type="button"
-            onClick={() => setForm({ ...form, yearly_goals: [...form.yearly_goals, { text: '', done: false, year: new Date().getFullYear() }] })}
-            className={btnSecondary}>+ Goal</button>
+            onClick={() => {
+              const existingYears = [...new Set(form.yearly_goals.map(g => g.year ?? new Date().getFullYear()))];
+              const maxYear = existingYears.length > 0 ? Math.max(...existingYears) : new Date().getFullYear() - 1;
+              const newYear = maxYear + 1;
+              if (existingYears.includes(newYear)) return;
+              setForm({ ...form, yearly_goals: [...form.yearly_goals, { text: '', done: false, year: newYear }] });
+            }}
+            className={btnSecondary}>+ Year</button>
         </div>
         {form.yearly_goals.length === 0 && (
           <p className="text-xs text-white/20 text-center py-6 uppercase tracking-widest">아직 목표가 없습니다.</p>
