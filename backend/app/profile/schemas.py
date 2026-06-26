@@ -1,9 +1,13 @@
 from pydantic import BaseModel, field_validator
-from typing import Any
+from typing import Any, Union
+
+class SkillItem(BaseModel):
+    name: str
+    desc: str = ""
 
 class SkillGroup(BaseModel):
     category: str
-    skills: list[str]
+    skills: list[Union[str, SkillItem]]
 
 class YearlyGoal(BaseModel):
     text: str
