@@ -4,6 +4,7 @@ import { projectsApi, statsApi, profileApi, organizationsApi, certificationsApi 
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { useLang } from '../context/LanguageContext';
 import type { Project, VisitorStats, Profile, Organization, Certification } from '../types';
+import { normalizeSkill } from '../types';
 
 function FadeUp({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
   const { ref, visible } = useScrollAnimation();
@@ -178,7 +179,7 @@ export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null);
 
   // 모달 상태
-  const [selectedSkillGroup, setSelectedSkillGroup] = useState<{ category: string; skills: string[] } | null>(null);
+  const [selectedSkillGroup, setSelectedSkillGroup] = useState<import('../types').SkillGroup | null>(null);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
   // Process 확장
   const [expandedProcess, setExpandedProcess] = useState<number | null>(null);
@@ -425,12 +426,15 @@ export default function Home() {
                     <span className="text-white/20 group-hover:text-white/60 transition-colors text-xs mt-0.5">↗</span>
                   </div>
                   <ul className="space-y-3">
-                    {skills.slice(0, 5).map(s => (
-                      <li key={s} className="flex items-center gap-3 text-sm text-white/60 font-medium">
-                        <span className="w-1 h-1 bg-white/30 rounded-full shrink-0" />
-                        {s}
-                      </li>
-                    ))}
+                    {skills.slice(0, 5).map((s, j) => {
+                      const item = normalizeSkill(s);
+                      return (
+                        <li key={j} className="flex items-center gap-3 text-sm text-white/60 font-medium">
+                          <span className="w-1 h-1 bg-white/30 rounded-full shrink-0" />
+                          {item.name}
+                        </li>
+                      );
+                    })}
                     {skills.length > 5 && (
                       <li className="text-[11px] text-white/25 uppercase tracking-widest pl-4">+{skills.length - 5}개 더보기</li>
                     )}
@@ -595,13 +599,21 @@ export default function Home() {
         <Modal onClose={() => setSelectedSkillGroup(null)}>
           <p className="text-[11px] font-semibold tracking-[0.3em] text-white/30 uppercase mb-2">Expertise</p>
           <h2 className="font-black text-3xl tracking-tight mb-8">{selectedSkillGroup.category}</h2>
-          <div className="space-y-3">
-            {selectedSkillGroup.skills.map((skill, i) => (
-              <div key={skill} className="flex items-center gap-4 py-3 border-b border-white/5">
-                <span className="text-[11px] font-black text-white/20 w-6">{String(i + 1).padStart(2, '0')}</span>
-                <span className="text-white/80 font-medium">{skill}</span>
-              </div>
-            ))}
+          <div className="space-y-2">
+            {selectedSkillGroup.skills.map((s, i) => {
+              const item = normalizeSkill(s);
+              return (
+                <div key={i} className="py-4 border-b border-white/5">
+                  <div className="flex items-center gap-4 mb-1">
+                    <span className="text-[11px] font-black text-white/20 w-6 shrink-0">{String(i + 1).padStart(2, '0')}</span>
+                    <span className="text-white/90 font-semibold">{item.name}</span>
+                  </div>
+                  {item.desc && (
+                    <p className="text-white/40 text-sm leading-relaxed pl-10">{item.desc}</p>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </Modal>
       )}

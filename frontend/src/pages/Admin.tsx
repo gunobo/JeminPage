@@ -3,6 +3,7 @@ import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi, organi
 import ImageUpload from '../components/ui/ImageUpload';
 import FileUpload from '../components/ui/FileUpload';
 import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost, Organization, Certification } from '../types';
+import { normalizeSkill } from '../types';
 
 const inputCls = 'w-full bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 focus:outline-none focus:border-white/30 transition-colors text-sm';
 const btnPrimary = 'px-6 py-3 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-white/80 transition-colors';
@@ -293,11 +294,18 @@ function ProfileTab() {
     const val = (skillInput[gi] || '').trim();
     if (!val) return;
     const g = form.skill_groups[gi];
-    if (!g.skills.includes(val)) updateGroup(gi, { skills: [...g.skills, val] });
+    const names = g.skills.map(s => normalizeSkill(s).name);
+    if (!names.includes(val)) updateGroup(gi, { skills: [...g.skills, { name: val, desc: '' }] });
     setSkillInput({ ...skillInput, [gi]: '' });
   };
   const removeSkill = (gi: number, si: number) =>
     updateGroup(gi, { skills: form.skill_groups[gi].skills.filter((_, i) => i !== si) });
+  const updateSkillDesc = (gi: number, si: number, desc: string) => {
+    const skills = form.skill_groups[gi].skills.map((s, i) =>
+      i === si ? { ...normalizeSkill(s), desc } : s
+    );
+    updateGroup(gi, { skills });
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -366,14 +374,26 @@ function ProfileTab() {
                 <button type="button" onClick={() => removeGroup(gi)}
                   className="px-3 text-red-400/40 hover:text-red-400 transition-colors text-sm">×</button>
               </div>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {group.skills.map((s, si) => (
-                  <span key={si} className="text-xs px-3 py-1 border border-white/10 text-white/40 flex items-center gap-2">
-                    {s}
-                    <button type="button" onClick={() => removeSkill(gi, si)}
-                      className="text-white/20 hover:text-red-400">×</button>
-                  </span>
-                ))}
+              <div className="space-y-2 mb-3">
+                {group.skills.map((s, si) => {
+                  const item = normalizeSkill(s);
+                  return (
+                    <div key={si} className="border border-white/10 p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <span className="text-xs text-white/60 font-medium flex-1">{item.name}</span>
+                        <button type="button" onClick={() => removeSkill(gi, si)}
+                          className="text-white/20 hover:text-red-400 text-sm">×</button>
+                      </div>
+                      <textarea
+                        value={item.desc || ''}
+                        onChange={e => updateSkillDesc(gi, si, e.target.value)}
+                        placeholder="이 기술로 무엇을 할 수 있는지 작성해주세요 (선택)"
+                        rows={2}
+                        className="w-full bg-white/5 border border-white/10 text-white/60 placeholder-white/15 px-3 py-2 focus:outline-none focus:border-white/20 text-xs resize-none"
+                      />
+                    </div>
+                  );
+                })}
               </div>
               <div className="flex gap-2">
                 <input value={skillInput[gi] || ''}

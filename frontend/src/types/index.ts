@@ -30,9 +30,18 @@ export interface VisitorStats {
   today: number;
 }
 
+export interface SkillItem {
+  name: string;
+  desc?: string;
+}
+
 export interface SkillGroup {
   category: string;
-  skills: string[];
+  skills: (string | SkillItem)[];
+}
+
+export function normalizeSkill(s: string | SkillItem): SkillItem {
+  return typeof s === 'string' ? { name: s, desc: '' } : s;
 }
 
 export interface YearlyGoal {
