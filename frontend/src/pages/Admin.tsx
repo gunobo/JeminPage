@@ -944,7 +944,7 @@ function VisitorChart() {
 
   if (data.length === 0) return null;
   const max = Math.max(...data.map(d => d.count), 1);
-  const W = 800, H = 120, pad = 4;
+  const W = data.length * 24, H = 120, pad = 4;
   const barW = (W - pad * (data.length - 1)) / data.length;
 
   return (
