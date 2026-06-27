@@ -944,8 +944,8 @@ function VisitorChart() {
 
   if (data.length === 0) return null;
   const max = Math.max(...data.map(d => d.count), 1);
-  const W = data.length * 24, H = 120, pad = 4;
-  const barW = (W - pad * (data.length - 1)) / data.length;
+  const pad = 4, barW = 20, H = 120;
+  const W = data.length * (barW + pad) - pad;
 
   return (
     <div className="border border-white/10 p-6 mb-8">
