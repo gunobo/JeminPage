@@ -937,6 +937,7 @@ type Tab = 'projects' | 'messages' | 'profile' | 'blog' | 'organizations' | 'cer
 function VisitorChart() {
   const [data, setData] = useState<{ date: string; count: number }[]>([]);
   const [range, setRange] = useState(30);
+  const [hovered, setHovered] = useState<number | null>(null);
 
   useEffect(() => {
     statsApi.daily(range).then(setData).catch(() => {});
@@ -965,11 +966,23 @@ function VisitorChart() {
           const bh = Math.max(2, (d.count / max) * H);
           const x = i * (barW + pad);
           const showLabel = data.length <= 14 || i % Math.ceil(data.length / 10) === 0;
+          const isHovered = hovered === i;
           return (
-            <g key={d.date}>
+            <g key={d.date} onMouseEnter={() => setHovered(i)} onMouseLeave={() => setHovered(null)} style={{ cursor: 'pointer' }}>
+              <rect x={x} y={0} width={barW} height={H} fill="transparent" />
               <rect x={x} y={H - bh} width={barW} height={bh}
-                fill={d.count > 0 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.06)'} />
-              {d.count > 0 && (
+                fill={isHovered ? 'rgba(255,255,255,0.85)' : d.count > 0 ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.06)'}
+                style={{ transition: 'fill 0.15s' }} />
+              {isHovered && (
+                <g>
+                  <rect x={x + barW / 2 - 28} y={H - bh - 32} width={56} height={24} rx={3} fill="rgba(255,255,255,0.1)" />
+                  <text x={x + barW / 2} y={H - bh - 22} textAnchor="middle"
+                    className="fill-white" style={{ fontSize: 9, fontWeight: 600 }}>{d.date.slice(5)}</text>
+                  <text x={x + barW / 2} y={H - bh - 12} textAnchor="middle"
+                    className="fill-white/70" style={{ fontSize: 9 }}>{d.count}명</text>
+                </g>
+              )}
+              {!isHovered && d.count > 0 && (
                 <text x={x + barW / 2} y={H - bh - 4} textAnchor="middle"
                   className="fill-white/40" style={{ fontSize: 9 }}>{d.count}</text>
               )}
