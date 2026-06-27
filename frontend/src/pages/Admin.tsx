@@ -960,7 +960,7 @@ function VisitorChart() {
           ))}
         </div>
       </div>
-      <svg viewBox={`0 0 ${W} ${H + 24}`} className="w-full" style={{ height: 120 }}>
+      <svg viewBox={`0 0 ${W} ${H + 24}`} className="w-full">
         {data.map((d, i) => {
           const bh = Math.max(2, (d.count / max) * H);
           const x = i * (barW + pad);
