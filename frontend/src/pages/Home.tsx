@@ -82,7 +82,7 @@ function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
   };
 
   return (
-    <section className="border-t border-white/10 py-40 overflow-hidden">
+    <section className="border-t border-white/10 py-20 md:py-40 overflow-hidden">
       <FadeUp>
         <div className="px-6 md:px-16 max-w-7xl mx-auto mb-16">
           <span className="text-[11px] font-semibold tracking-[0.3em] text-white/30 uppercase">{t('goalsYear')}</span>
@@ -123,7 +123,7 @@ function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
               onClick={() => setActiveIdx(i)}
               className="absolute flex flex-col gap-5 border p-8 cursor-pointer"
               style={{
-                width: '340px', minHeight: '360px',
+                width: 'min(340px, 85vw)', minHeight: '360px',
                 borderColor: isActive ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.06)',
                 background: isActive ? 'rgba(255,255,255,0.04)' : '#0a0a0a',
                 ...style,
@@ -232,7 +232,7 @@ export default function Home() {
     <main className="bg-[#0a0a0a] text-white overflow-x-hidden">
 
       {/* ── HERO ── */}
-      <section ref={heroRef} className="relative min-h-screen flex flex-col justify-between px-6 md:px-16 pt-24 pb-12 overflow-hidden">
+      <section ref={heroRef} className="relative min-h-screen flex flex-col justify-between px-6 md:px-16 pt-20 md:pt-24 pb-8 md:pb-12 overflow-hidden">
         <div className="pointer-events-none fixed w-[800px] h-[800px] rounded-full opacity-[0.06] blur-3xl z-0"
           style={{
             background: 'radial-gradient(circle, #ffffff 0%, transparent 70%)',
@@ -246,10 +246,10 @@ export default function Home() {
             transform: `translateY(${scrollY * 0.2}px)`,
           }} />
 
-        <div className="relative flex justify-between items-start max-w-7xl mx-auto w-full">
-          <span className="text-[11px] font-semibold tracking-[0.25em] text-white/30 uppercase">Portfolio 2026</span>
+        <div className="relative flex justify-between items-start max-w-7xl mx-auto w-full gap-4">
+          <span className="text-[11px] font-semibold tracking-[0.25em] text-white/30 uppercase shrink-0">Portfolio 2026</span>
           {profile?.tagline && (
-            <span className="text-sm md:text-base font-semibold tracking-widest text-white/50 uppercase text-right">{profile.tagline}</span>
+            <span className="text-[11px] md:text-sm font-semibold tracking-widest text-white/50 uppercase text-right line-clamp-2">{profile.tagline}</span>
           )}
         </div>
 
@@ -302,7 +302,7 @@ export default function Home() {
       </div>
 
       {/* ── ABOUT ── */}
-      <section className="px-6 md:px-16 py-40 max-w-7xl mx-auto">
+      <section className="px-6 md:px-16 py-20 md:py-40 max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-24 items-center">
           <SlideIn from="left">
             <span className="text-[11px] font-semibold tracking-[0.3em] text-white/30 uppercase">About</span>
@@ -331,7 +331,7 @@ export default function Home() {
 
       {/* ── FEATURED PROJECTS ── */}
       {featured.length > 0 && (
-        <section className="px-6 md:px-16 pb-40 max-w-7xl mx-auto">
+        <section className="px-6 md:px-16 pb-20 md:pb-40 max-w-7xl mx-auto">
           <FadeUp>
             <div className="flex items-end justify-between mb-16 border-t border-white/10 pt-12">
               <div>
@@ -404,7 +404,7 @@ export default function Home() {
 
       {/* ── SKILLS ── */}
       {profile?.skill_groups && profile.skill_groups.length > 0 && (
-        <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto">
+        <section className="border-t border-white/10 px-6 md:px-16 py-20 md:py-40 max-w-7xl mx-auto">
           <FadeUp>
             <div className="flex items-end justify-between mb-6">
               <div>
@@ -448,7 +448,7 @@ export default function Home() {
 
       {/* ── ORGANIZATIONS ── */}
       {orgs.length > 0 && (
-        <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto">
+        <section className="border-t border-white/10 px-6 md:px-16 py-20 md:py-40 max-w-7xl mx-auto">
           <FadeUp>
             <div className="flex items-end justify-between mb-6">
               <div>
@@ -496,7 +496,7 @@ export default function Home() {
 
       {/* ── CERTIFICATIONS ── */}
       {certs.length > 0 && (
-        <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto">
+        <section className="border-t border-white/10 px-6 md:px-16 py-20 md:py-40 max-w-7xl mx-auto">
           <FadeUp>
             <div className="flex items-end justify-between mb-20">
               <div>
@@ -537,7 +537,7 @@ export default function Home() {
       )}
 
       {/* ── PROCESS ── */}
-      <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto">
+      <section className="border-t border-white/10 px-6 md:px-16 py-20 md:py-40 max-w-7xl mx-auto">
         <FadeUp>
           <span className="text-[11px] font-semibold tracking-[0.3em] text-white/30 uppercase">How I Work</span>
           <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2 mb-20">Process</h2>
@@ -551,20 +551,20 @@ export default function Home() {
                   className="group bg-[#0a0a0a] hover:bg-white/[0.02] transition-colors cursor-pointer"
                   onClick={() => setExpandedProcess(isOpen ? null : i)}
                 >
-                  <div className="flex items-center gap-12 p-10">
-                    <span className="font-black text-5xl text-white/10 group-hover:text-white/30 transition-colors shrink-0 w-16">{num}</span>
-                    <div className="flex-1 flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                      <h3 className="font-black text-2xl md:text-3xl tracking-tight group-hover:text-white transition-colors">{title}</h3>
-                      {!isOpen && <p className="text-white/40 text-sm max-w-sm">{desc}</p>}
+                  <div className="flex items-center gap-4 md:gap-12 p-6 md:p-10">
+                    <span className="font-black text-3xl md:text-5xl text-white/10 group-hover:text-white/30 transition-colors shrink-0 w-10 md:w-16">{num}</span>
+                    <div className="flex-1 flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-3">
+                      <h3 className="font-black text-xl md:text-3xl tracking-tight group-hover:text-white transition-colors">{title}</h3>
+                      {!isOpen && <p className="text-white/40 text-sm max-w-sm hidden md:block">{desc}</p>}
                     </div>
                     <span
-                      className="text-white/30 group-hover:text-white transition-all duration-300 text-xl shrink-0"
+                      className="text-white/30 group-hover:text-white transition-all duration-300 text-lg shrink-0"
                       style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}
                     >→</span>
                   </div>
                   {isOpen && (
-                    <div className="px-10 pb-10 pl-[calc(4rem+3rem)]">
-                      <p className="text-white/60 text-base leading-relaxed border-l border-white/10 pl-6">{desc}</p>
+                    <div className="px-6 md:px-10 pb-6 md:pb-10 pl-[calc(2.5rem+1rem)] md:pl-[calc(4rem+3rem)]">
+                      <p className="text-white/60 text-sm md:text-base leading-relaxed border-l border-white/10 pl-4 md:pl-6">{desc}</p>
                     </div>
                   )}
                 </div>
@@ -580,7 +580,7 @@ export default function Home() {
       )}
 
       {/* ── CTA ── */}
-      <section className="border-t border-white/10 px-6 md:px-16 py-40 max-w-7xl mx-auto text-center">
+      <section className="border-t border-white/10 px-6 md:px-16 py-20 md:py-40 max-w-7xl mx-auto text-center">
         <FadeUp>
           <span className="text-[11px] font-semibold tracking-[0.3em] text-white/30 uppercase">Let's Talk</span>
           <h2 className="font-black tracking-tighter mt-4 mb-12 leading-none"
