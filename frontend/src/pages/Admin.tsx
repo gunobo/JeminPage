@@ -52,7 +52,7 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
 
 const EMPTY_FORM = {
   title: '', description: '', tech_stack: [] as string[],
-  github_url: '', demo_url: '', thumbnail_url: '', is_featured: false,
+  github_url: '', demo_url: '', thumbnail_url: '', is_featured: false, category: '',
 };
 
 function ProjectsTab() {
@@ -75,7 +75,7 @@ function ProjectsTab() {
     setEditingId(p.id);
     setForm({ title: p.title, description: p.description, tech_stack: p.tech_stack,
       github_url: p.github_url || '', demo_url: p.demo_url || '',
-      thumbnail_url: p.thumbnail_url || '', is_featured: p.is_featured });
+      thumbnail_url: p.thumbnail_url || '', is_featured: p.is_featured, category: p.category || '' });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -139,6 +139,10 @@ function ProjectsTab() {
               onChange={e => setForm({ ...form, demo_url: e.target.value })}
               placeholder="Demo URL" className={inputCls} />
           </div>
+
+          <input value={form.category}
+            onChange={e => setForm({ ...form, category: e.target.value })}
+            placeholder="카테고리 (예: Web, App, VSCode Extension)" className={inputCls} />
 
           <label className="flex items-center gap-3 cursor-pointer group">
             <div className={`w-10 h-5 rounded-full transition-colors relative ${form.is_featured ? 'bg-white' : 'bg-white/10'}`}

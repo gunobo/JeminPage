@@ -7,11 +7,15 @@ import type { Project } from '../types';
 export default function Projects() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const { t } = useLang();
 
   useEffect(() => {
     projectsApi.list().then(setProjects).finally(() => setLoading(false));
   }, []);
+
+  const categories = Array.from(new Set(projects.map(p => p.category).filter(Boolean))) as string[];
+  const filtered = activeCategory ? projects.filter(p => p.category === activeCategory) : projects;
 
   return (
     <main className="bg-[#0a0a0a] text-white min-h-screen">
@@ -19,6 +23,23 @@ export default function Projects() {
         <div className="border-b border-white/10 pb-12 mb-16">
           <span className="text-xs font-semibold tracking-[0.3em] text-white/30 uppercase">Portfolio</span>
           <h1 className="font-black text-[10vw] tracking-tighter leading-none mt-2">{t('projects')}</h1>
+          {categories.length > 0 && (
+            <div className="flex flex-wrap gap-3 mt-8">
+              <button
+                onClick={() => setActiveCategory(null)}
+                className={`text-[11px] font-semibold tracking-widest uppercase px-4 py-2 border transition-colors ${
+                  activeCategory === null ? 'border-white text-white' : 'border-white/20 text-white/30 hover:text-white/60'
+                }`}>All</button>
+              {categories.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`text-[11px] font-semibold tracking-widest uppercase px-4 py-2 border transition-colors ${
+                    activeCategory === cat ? 'border-white text-white' : 'border-white/20 text-white/30 hover:text-white/60'
+                  }`}>{cat}</button>
+              ))}
+            </div>
+          )}
         </div>
 
         {loading ? (
@@ -29,7 +50,7 @@ export default function Projects() {
           <div className="text-center py-32 text-white/20 text-sm uppercase tracking-widest">No projects yet.</div>
         ) : (
           <div className="space-y-px bg-white/10">
-            {projects.map((project, i) => (
+            {filtered.map((project, i) => (
               <div key={project.id} className="group bg-[#0a0a0a] grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-0">
                 <div className="relative flex items-center justify-center overflow-hidden h-72 md:h-full min-h-[280px]">
                   {project.thumbnail_url ? (
@@ -62,9 +83,14 @@ export default function Projects() {
                   <div>
                     <div className="flex items-center justify-between mb-6">
                       <span className="text-xs font-semibold tracking-widest text-white/20 uppercase">{String(i + 1).padStart(2, '0')}</span>
-                      {project.is_featured && (
-                        <span className="text-xs font-semibold tracking-widest text-white/30 uppercase border border-white/10 px-3 py-1">{t('featured')}</span>
-                      )}
+                      <div className="flex gap-2">
+                        {project.category && (
+                          <span className="text-xs font-semibold tracking-widest text-white/40 uppercase border border-white/10 px-3 py-1">{project.category}</span>
+                        )}
+                        {project.is_featured && (
+                          <span className="text-xs font-semibold tracking-widest text-white/30 uppercase border border-white/10 px-3 py-1">{t('featured')}</span>
+                        )}
+                      </div>
                     </div>
                     <h2 className="font-black text-3xl md:text-4xl tracking-tight mb-4">{project.title}</h2>
                     <p className="text-white/40 leading-relaxed mb-8 line-clamp-3">{project.description}</p>

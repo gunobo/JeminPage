@@ -7,6 +7,7 @@ export interface Project {
   demo_url?: string;
   thumbnail_url?: string;
   is_featured: boolean;
+  category?: string;
   created_at: string;
 }
 

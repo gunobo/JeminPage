@@ -9,6 +9,7 @@ class ProjectBase(BaseModel):
     demo_url: str | None = None
     thumbnail_url: str | None = None
     is_featured: bool = False
+    category: str | None = None
 
 class ProjectCreate(ProjectBase):
     pass

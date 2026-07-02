@@ -13,4 +13,5 @@ class Project(Base):
     demo_url = Column(String(500))
     thumbnail_url = Column(String(500))
     is_featured = Column(Boolean, default=False)
+    category = Column(String(100), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
