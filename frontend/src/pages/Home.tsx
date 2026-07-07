@@ -57,110 +57,64 @@ function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
   const { t } = useLang();
   const years = [...new Set(goals.map(g => g.year ?? 2026))].sort((a, b) => a - b);
   const currentYear = new Date().getFullYear();
-  const [activeIdx, setActiveIdx] = useState(() => {
-    const ci = years.indexOf(currentYear);
-    return ci >= 0 ? ci : Math.floor(years.length / 2);
+  const [activeYear, setActiveYear] = useState(() => {
+    return years.includes(currentYear) ? currentYear : years[years.length - 1];
   });
-  const dragStartX = useRef<number | null>(null);
 
-  const prev = () => setActiveIdx(i => Math.max(0, i - 1));
-  const next = () => setActiveIdx(i => Math.min(years.length - 1, i + 1));
-
-  const getStyle = (i: number) => {
-    const offset = i - activeIdx;
-    const absOff = Math.abs(offset);
-    if (absOff > 2) return { display: 'none' };
-    const scale = absOff === 0 ? 1 : absOff === 1 ? 0.78 : 0.62;
-    const translateX = offset * 72;
-    const opacity = absOff === 0 ? 1 : absOff === 1 ? 0.5 : 0.2;
-    const zIndex = 10 - absOff;
-    return {
-      transform: `translateX(${translateX}%) scale(${scale})`,
-      opacity, zIndex,
-      transition: 'transform 0.5s cubic-bezier(0.25,0.46,0.45,0.94), opacity 0.5s ease',
-    };
-  };
+  const yearGoals = goals.filter(g => (g.year ?? 2026) === activeYear);
+  const done = yearGoals.filter(g => g.done).length;
+  const pct = yearGoals.length > 0 ? Math.round((done / yearGoals.length) * 100) : 0;
 
   return (
-    <section className="border-t border-white/10 py-20 md:py-40 overflow-hidden">
-      <FadeUp>
-        <div className="px-6 md:px-16 max-w-7xl mx-auto mb-16">
-          <span className="text-[11px] font-semibold tracking-[0.3em] text-white/30 uppercase">{t('goalsYear')}</span>
-          <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">{t('goals')}</h2>
-        </div>
-      </FadeUp>
-
-      <div
-        className="relative flex items-center justify-center select-none"
-        style={{ height: '420px' }}
-        onMouseDown={e => { dragStartX.current = e.clientX; }}
-        onMouseUp={e => {
-          if (dragStartX.current === null) return;
-          const diff = dragStartX.current - e.clientX;
-          if (diff > 40) next();
-          else if (diff < -40) prev();
-          dragStartX.current = null;
-        }}
-        onTouchStart={e => { dragStartX.current = e.touches[0].clientX; }}
-        onTouchEnd={e => {
-          if (dragStartX.current === null) return;
-          const diff = dragStartX.current - e.changedTouches[0].clientX;
-          if (diff > 40) next();
-          else if (diff < -40) prev();
-          dragStartX.current = null;
-        }}
-      >
-        {years.map((year, i) => {
-          const yearGoals = goals.filter(g => (g.year ?? 2026) === year);
-          const done = yearGoals.filter(g => g.done).length;
-          const pct = yearGoals.length > 0 ? Math.round((done / yearGoals.length) * 100) : 0;
-          const isActive = i === activeIdx;
-          const style = getStyle(i);
-          if (style.display === 'none') return null;
-          return (
-            <div
-              key={year}
-              onClick={() => setActiveIdx(i)}
-              className="absolute flex flex-col gap-5 border p-8 cursor-pointer"
-              style={{
-                width: 'min(340px, 85vw)', minHeight: '360px',
-                borderColor: isActive ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.06)',
-                background: isActive ? 'rgba(255,255,255,0.04)' : '#0a0a0a',
-                ...style,
-              }}
-            >
-              <div className="flex items-center justify-between">
-                <span className="font-black text-5xl tracking-tighter">{year}</span>
-                {year === currentYear && <span className="text-[10px] font-black uppercase tracking-widest text-white/30 border border-white/10 px-2 py-1">Now</span>}
-              </div>
-              <div className="h-px bg-white/10 w-full overflow-hidden">
-                <div className="h-full bg-white/40 transition-all duration-1000" style={{ width: `${pct}%` }} />
-              </div>
-              <div className="space-y-3 flex-1">
-                {yearGoals.map((goal, gi) => (
-                  <div key={gi} className={`flex items-start gap-3 ${goal.done ? 'opacity-30' : ''}`}>
-                    <span className="w-1.5 h-1.5 mt-1.5 rounded-full bg-white/30 shrink-0" />
-                    <span className={`text-sm leading-relaxed ${goal.done ? 'line-through text-white/30' : 'text-white/70'}`}>{goal.text}</span>
-                  </div>
-                ))}
-              </div>
-              <div className="text-[11px] font-black text-white/30 uppercase tracking-widest">{done}/{yearGoals.length} · {pct}%</div>
+    <section className="border-t border-white/10 py-20 md:py-40">
+      <div className="px-6 md:px-16 max-w-7xl mx-auto">
+        <FadeUp>
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+            <div>
+              <span className="text-[11px] font-semibold tracking-[0.3em] text-white/30 uppercase">{t('goalsYear')}</span>
+              <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">{t('goals')}</h2>
             </div>
-          );
-        })}
-      </div>
+            <div className="flex gap-2 flex-wrap">
+              {years.map(year => (
+                <button
+                  key={year}
+                  onClick={() => setActiveYear(year)}
+                  className={`text-sm font-black tracking-tight px-5 py-2 border transition-colors ${
+                    activeYear === year
+                      ? 'border-white text-white'
+                      : 'border-white/10 text-white/30 hover:border-white/30 hover:text-white/60'
+                  }`}
+                >
+                  {year}
+                  {year === currentYear && <span className="ml-2 text-[9px] text-white/30 uppercase tracking-widest">Now</span>}
+                </button>
+              ))}
+            </div>
+          </div>
+        </FadeUp>
 
-      <div className="flex items-center justify-center gap-6 mt-8">
-        <button onClick={prev} disabled={activeIdx === 0}
-          className="text-white/30 hover:text-white disabled:opacity-10 transition-colors text-xl px-2">←</button>
-        <div className="flex gap-2">
-          {years.map((_, i) => (
-            <button key={i} onClick={() => setActiveIdx(i)} className="transition-all duration-300"
-              style={{ width: i === activeIdx ? '24px' : '6px', height: '6px', borderRadius: '3px', background: i === activeIdx ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.2)' }} />
-          ))}
-        </div>
-        <button onClick={next} disabled={activeIdx === years.length - 1}
-          className="text-white/30 hover:text-white disabled:opacity-10 transition-colors text-xl px-2">→</button>
+        <FadeUp>
+          <div className="mb-6">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-[11px] font-semibold tracking-widest text-white/20 uppercase">{done}/{yearGoals.length} 완료</span>
+              <span className="text-[11px] font-black text-white/30">{pct}%</span>
+            </div>
+            <div className="h-px bg-white/10 w-full overflow-hidden">
+              <div className="h-full bg-white/50 transition-all duration-700" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-px bg-white/5">
+            {yearGoals.map((goal, gi) => (
+              <div key={gi} className={`flex items-start gap-4 bg-[#0a0a0a] px-6 py-5 ${goal.done ? 'opacity-40' : ''}`}>
+                <span className={`mt-1 w-4 h-4 shrink-0 border flex items-center justify-center ${goal.done ? 'border-white/30 bg-white/10' : 'border-white/15'}`}>
+                  {goal.done && <span className="text-white text-[10px]">✓</span>}
+                </span>
+                <span className={`text-sm leading-relaxed ${goal.done ? 'line-through text-white/30' : 'text-white/70'}`}>{goal.text}</span>
+              </div>
+            ))}
+          </div>
+        </FadeUp>
       </div>
     </section>
   );
