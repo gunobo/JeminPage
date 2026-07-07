@@ -254,12 +254,24 @@ export default function Home() {
         </div>
 
         <div className="relative max-w-7xl mx-auto w-full">
-          <h1 className="font-black leading-[0.85] tracking-tighter uppercase"
-            style={{ fontSize: 'clamp(80px, 14vw, 200px)', transform: `translateY(${scrollY * 0.15}px)` }}>
-            {profile?.name
-              ? profile.name.split(' ').map((w, i) => <span key={i} className="block">{w}</span>)
-              : <><span className="block">Im</span><span className="block text-white/10">Jemin</span></>}
-          </h1>
+          <div className="flex items-start justify-between gap-6">
+            <h1 className="font-black leading-[0.85] tracking-tighter uppercase"
+              style={{ fontSize: 'clamp(80px, 14vw, 200px)', transform: `translateY(${scrollY * 0.15}px)` }}>
+              {profile?.name
+                ? profile.name.split(' ').map((w, i) => <span key={i} className="block">{w}</span>)
+                : <><span className="block">Im</span><span className="block text-white/10">Jemin</span></>}
+            </h1>
+            {profile?.avatar_url && (
+              <div className="shrink-0 mt-2" style={{ transform: `translateY(${scrollY * 0.15}px)` }}>
+                <img
+                  src={profile.avatar_url}
+                  alt="profile"
+                  className="rounded-full object-cover ring-1 ring-white/10"
+                  style={{ width: 'clamp(80px, 10vw, 160px)', height: 'clamp(80px, 10vw, 160px)' }}
+                />
+              </div>
+            )}
+          </div>
           <div className="mt-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
             <p className="text-white/50 text-base md:text-lg max-w-sm leading-relaxed">
               {profile?.bio || '개발자이자 디자이너로서\n창의적인 디지털 경험을 만듭니다.'}
