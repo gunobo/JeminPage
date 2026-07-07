@@ -267,7 +267,7 @@ export default function Home() {
                   src={profile.avatar_url}
                   alt="profile"
                   className="rounded-full object-cover ring-1 ring-white/10"
-                  style={{ width: 'clamp(80px, 10vw, 160px)', height: 'clamp(80px, 10vw, 160px)' }}
+                  style={{ width: 'clamp(100px, 14vw, 220px)', height: 'clamp(100px, 14vw, 220px)' }}
                 />
               </div>
             )}
