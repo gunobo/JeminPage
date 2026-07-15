@@ -20,7 +20,7 @@ query Posts($username: String!, $cursor: ID, $limit: Int) {
     title
     short_description
     thumbnail
-    slug
+    url_slug
     tags
     released_at
   }
@@ -78,7 +78,7 @@ async def sync_from_velog(db: Session = Depends(get_db), _=Depends(require_auth)
             db.add(VelogPost(
                 velog_id=p["id"],
                 title=p["title"],
-                slug=p["slug"],
+                slug=p["url_slug"],
                 short_description=p.get("short_description"),
                 thumbnail=p.get("thumbnail"),
                 tags=p.get("tags") or [],
