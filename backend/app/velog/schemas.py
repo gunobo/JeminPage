@@ -10,6 +10,8 @@ class VelogPostOut(BaseModel):
     thumbnail: str | None = None
     tags: list[str] = []
     released_at: datetime | None = None
+    series_name: str | None = None
+    series_slug: str | None = None
     is_displayed: bool
 
     model_config = {"from_attributes": True}

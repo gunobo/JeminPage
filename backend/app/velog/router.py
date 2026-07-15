@@ -23,6 +23,7 @@ query Posts($username: String!, $cursor: ID, $limit: Int) {
     url_slug
     tags
     released_at
+    series { name url_slug }
   }
 }
 """
@@ -68,12 +69,18 @@ async def sync_from_velog(db: Session = Depends(get_db), _=Depends(require_auth)
             except Exception:
                 pass
 
+        series = p.get("series") or {}
+        series_name = series.get("name")
+        series_slug = series.get("url_slug")
+
         if existing:
             existing.title = p["title"]
             existing.short_description = p.get("short_description")
             existing.thumbnail = p.get("thumbnail")
             existing.tags = p.get("tags") or []
             existing.released_at = released
+            existing.series_name = series_name
+            existing.series_slug = series_slug
         else:
             db.add(VelogPost(
                 velog_id=p["id"],
@@ -83,6 +90,8 @@ async def sync_from_velog(db: Session = Depends(get_db), _=Depends(require_auth)
                 thumbnail=p.get("thumbnail"),
                 tags=p.get("tags") or [],
                 released_at=released,
+                series_name=series_name,
+                series_slug=series_slug,
                 is_displayed=False,
             ))
             new_count += 1

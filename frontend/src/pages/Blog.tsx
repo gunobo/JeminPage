@@ -44,6 +44,9 @@ export default function Blog() {
                 </span>
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-3 mb-2">
+                    {post.series_name && (
+                      <span className="text-[11px] px-2 py-0.5 bg-white/10 text-white/60 tracking-widest">{post.series_name}</span>
+                    )}
                     {post.tags.slice(0, 3).map(tag => (
                       <span key={tag} className="text-[11px] px-2 py-0.5 border border-white/10 text-white/20 uppercase tracking-widest">{tag}</span>
                     ))}

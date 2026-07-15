@@ -13,5 +13,7 @@ class VelogPost(Base):
     thumbnail = Column(String(500))
     tags = Column(JSON, default=list)
     released_at = Column(DateTime(timezone=True))
+    series_name = Column(String(200), nullable=True)
+    series_slug = Column(String(200), nullable=True)
     is_displayed = Column(Boolean, default=False)
     synced_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

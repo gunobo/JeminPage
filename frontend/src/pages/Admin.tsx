@@ -565,7 +565,8 @@ function VelogTab() {
               <tr>
                 <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">표시</th>
                 <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">제목</th>
-                <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden md:table-cell">태그</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden md:table-cell">시리즈</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden lg:table-cell">태그</th>
                 <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden sm:table-cell">날짜</th>
               </tr>
             </thead>
@@ -588,6 +589,11 @@ function VelogTab() {
                     )}
                   </td>
                   <td className="px-4 py-4 hidden md:table-cell">
+                    {post.series_name ? (
+                      <span className="text-[10px] px-2 py-0.5 bg-white/10 text-white/50">{post.series_name}</span>
+                    ) : <span className="text-white/10">-</span>}
+                  </td>
+                  <td className="px-4 py-4 hidden lg:table-cell">
                     <div className="flex flex-wrap gap-1">
                       {post.tags.slice(0, 3).map(t => (
                         <span key={t} className="text-[10px] px-2 py-0.5 border border-white/10 text-white/20">{t}</span>

@@ -73,6 +73,8 @@ export interface VelogPost {
   thumbnail?: string;
   tags: string[];
   released_at?: string;
+  series_name?: string;
+  series_slug?: string;
   is_displayed: boolean;
 }
 
