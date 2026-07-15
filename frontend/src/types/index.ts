@@ -64,6 +64,18 @@ export interface BlogPost {
   updated_at: string;
 }
 
+export interface VelogPost {
+  id: number;
+  velog_id: string;
+  title: string;
+  slug: string;
+  short_description?: string;
+  thumbnail?: string;
+  tags: string[];
+  released_at?: string;
+  is_displayed: boolean;
+}
+
 export interface Certification {
   id: number;
   name: string;

@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Project, ContactForm, ContactMessage, VisitorStats, Profile, BlogPost, Organization, Certification } from '../types';
+import type { Project, ContactForm, ContactMessage, VisitorStats, Profile, BlogPost, Organization, Certification, VelogPost } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -77,6 +77,13 @@ export const organizationsApi = {
   create: (data: Omit<Organization, 'id'>) => api.post<Organization>('/organizations', data).then(r => r.data),
   update: (id: number, data: Omit<Organization, 'id'>) => api.put<Organization>(`/organizations/${id}`, data).then(r => r.data),
   delete: (id: number) => api.delete(`/organizations/${id}`),
+};
+
+export const velogApi = {
+  list: () => api.get<VelogPost[]>('/velog').then(r => r.data),
+  listAll: () => api.get<VelogPost[]>('/velog/all').then(r => r.data),
+  sync: () => api.post<{ synced: number; new: number }>('/velog/sync').then(r => r.data),
+  toggle: (id: number) => api.patch<VelogPost>(`/velog/${id}/toggle`).then(r => r.data),
 };
 
 export const uploadsApi = {

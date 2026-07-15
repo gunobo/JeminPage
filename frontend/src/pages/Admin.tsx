@@ -1,8 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi, organizationsApi, certificationsApi } from '../api';
+import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi, organizationsApi, certificationsApi, velogApi } from '../api';
 import ImageUpload from '../components/ui/ImageUpload';
 import FileUpload from '../components/ui/FileUpload';
-import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost, Organization, Certification } from '../types';
+import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost, Organization, Certification, VelogPost } from '../types';
 import { normalizeSkill } from '../types';
 
 const inputCls = 'w-full bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 focus:outline-none focus:border-white/30 transition-colors text-sm';
@@ -513,6 +513,100 @@ function renderContent(content: string) {
   });
 }
 
+function VelogTab() {
+  const [posts, setPosts] = useState<VelogPost[]>([]);
+  const [syncing, setSyncing] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  const load = () => velogApi.listAll().then(setPosts).catch(() => {});
+
+  useEffect(() => { load(); }, []);
+
+  const sync = async () => {
+    setSyncing(true); setMsg('');
+    try {
+      const res = await velogApi.sync();
+      setMsg(`완료: 총 ${res.synced}개 중 신규 ${res.new}개`);
+      load();
+    } catch {
+      setMsg('동기화 실패');
+    } finally {
+      setSyncing(false);
+    }
+  };
+
+  const toggle = async (id: number) => {
+    await velogApi.toggle(id);
+    setPosts(prev => prev.map(p => p.id === id ? { ...p, is_displayed: !p.is_displayed } : p));
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-black text-xl">Velog 포스트</h2>
+          <p className="text-white/30 text-xs mt-1">표시할 글을 선택하세요. 블로그 페이지에 노출됩니다.</p>
+        </div>
+        <div className="flex items-center gap-4">
+          {msg && <span className="text-xs text-white/40">{msg}</span>}
+          <button onClick={sync} disabled={syncing}
+            className="px-5 py-2 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-white/80 transition-colors disabled:opacity-40">
+            {syncing ? '동기화 중...' : '벨로그 동기화'}
+          </button>
+        </div>
+      </div>
+
+      {posts.length === 0 ? (
+        <div className="text-center py-16 text-white/20 text-sm">동기화 버튼을 눌러 글을 가져오세요.</div>
+      ) : (
+        <div className="border border-white/10 overflow-hidden">
+          <table className="w-full">
+            <thead className="border-b border-white/10">
+              <tr>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">표시</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">제목</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden md:table-cell">태그</th>
+                <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden sm:table-cell">날짜</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {posts.map(post => (
+                <tr key={post.id} className="hover:bg-white/[0.02] transition-colors">
+                  <td className="px-4 py-4">
+                    <button onClick={() => toggle(post.id)}
+                      className={`w-10 h-5 rounded-full transition-colors relative ${post.is_displayed ? 'bg-white' : 'bg-white/10'}`}>
+                      <span className={`absolute top-0.5 w-4 h-4 rounded-full transition-all ${post.is_displayed ? 'bg-black left-5' : 'bg-white/40 left-0.5'}`} />
+                    </button>
+                  </td>
+                  <td className="px-4 py-4">
+                    <a href={`https://velog.io/@startea0716/${post.slug}`} target="_blank" rel="noreferrer"
+                      className="text-sm font-semibold hover:text-white/60 transition-colors line-clamp-1">
+                      {post.title}
+                    </a>
+                    {post.short_description && (
+                      <p className="text-xs text-white/20 mt-1 line-clamp-1">{post.short_description}</p>
+                    )}
+                  </td>
+                  <td className="px-4 py-4 hidden md:table-cell">
+                    <div className="flex flex-wrap gap-1">
+                      {post.tags.slice(0, 3).map(t => (
+                        <span key={t} className="text-[10px] px-2 py-0.5 border border-white/10 text-white/20">{t}</span>
+                      ))}
+                    </div>
+                  </td>
+                  <td className="px-4 py-4 text-xs text-white/20 hidden sm:table-cell">
+                    {post.released_at ? new Date(post.released_at).toLocaleDateString('ko-KR') : '-'}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function BlogTab() {
   const [posts, setPosts] = useState<BlogPost[]>([]);
   const [form, setForm] = useState(EMPTY_POST);
@@ -936,7 +1030,7 @@ function OrganizationsTab() {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-type Tab = 'projects' | 'messages' | 'profile' | 'blog' | 'organizations' | 'certifications';
+type Tab = 'projects' | 'messages' | 'profile' | 'blog' | 'organizations' | 'certifications' | 'velog';
 
 function VisitorChart() {
   const [data, setData] = useState<{ date: string; count: number }[]>([]);
@@ -1065,7 +1159,7 @@ export default function Admin() {
 
         {/* Tabs */}
         <div className="flex gap-0 mb-8 border-b border-white/10">
-          {([['profile', '프로필'], ['projects', '프로젝트'], ['organizations', '활동'], ['certifications', '자격증'], ['blog', '블로그'], ['messages', '메시지']] as [Tab, string][]).map(([t, label]) => (
+          {([['profile', '프로필'], ['projects', '프로젝트'], ['organizations', '활동'], ['certifications', '자격증'], ['blog', '블로그'], ['velog', 'Velog'], ['messages', '메시지']] as [Tab, string][]).map(([t, label]) => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-6 py-3 text-xs font-black uppercase tracking-widest border-b-2 -mb-px transition-colors ${
                 tab === t ? 'border-white text-white' : 'border-transparent text-white/20 hover:text-white/50'
@@ -1080,6 +1174,7 @@ export default function Admin() {
         {tab === 'organizations' && <OrganizationsTab />}
         {tab === 'certifications' && <CertificationsTab />}
         {tab === 'blog' && <BlogTab />}
+        {tab === 'velog' && <VelogTab />}
         {tab === 'messages' && <MessagesTab />}
       </div>
     </main>
