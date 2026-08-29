@@ -1,3 +1,5 @@
+import { Link } from 'react-router-dom';
+
 export default function Footer() {
   return (
     <footer className="bg-[#0a0a0a] border-t border-white/10">
@@ -6,6 +8,10 @@ export default function Footer() {
           © 2026 imjemin
         </span>
         <div className="flex gap-8">
+          <Link to="/privacy"
+            className="text-xs font-semibold tracking-widest uppercase text-white/20 hover:text-white transition-colors">
+            개인정보처리방침
+          </Link>
           <a href="https://github.com/gunobo" target="_blank" rel="noreferrer"
             className="text-xs font-semibold tracking-widest uppercase text-white/20 hover:text-white transition-colors">
             GitHub
