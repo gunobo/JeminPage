@@ -126,6 +126,17 @@ export const velogApi = {
   toggle: (id: number) => api.patch<VelogPost>(`/velog/${id}/toggle`).then(r => r.data),
 };
 
+/** 업로드 실패 시 서버가 준 이유(detail)를 그대로 보여 준다 */
+export function uploadErrorMessage(err: unknown): string {
+  if (axios.isAxiosError(err)) {
+    const detail = err.response?.data?.detail;
+    if (typeof detail === 'string') return detail;
+    if (err.response?.status === 413) return '파일이 너무 큽니다 (25MB 이하).';
+    if (err.response?.status === 401) return '로그인이 만료되었습니다. 다시 로그인해주세요.';
+  }
+  return '업로드에 실패했습니다.';
+}
+
 export const uploadsApi = {
   upload: (file: File, onProgress?: (pct: number) => void) => {
     const form = new FormData();

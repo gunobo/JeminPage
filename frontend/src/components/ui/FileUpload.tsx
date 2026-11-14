@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { uploadsApi } from '../../api';
+import { uploadsApi, uploadErrorMessage } from '../../api';
 
 interface Props {
   value: string;
@@ -19,8 +19,8 @@ export default function FileUpload({ value, onChange, accept = 'application/pdf'
     try {
       const url = await uploadsApi.upload(file, setProgress);
       onChange(url);
-    } catch {
-      setError('업로드에 실패했습니다.');
+    } catch (err) {
+      setError(uploadErrorMessage(err));
     } finally {
       setProgress(null);
     }

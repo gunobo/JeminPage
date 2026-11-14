@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { uploadsApi } from '../../api';
+import { uploadsApi, uploadErrorMessage } from '../../api';
 
 interface Props {
   value: string;
@@ -17,8 +17,8 @@ export default function ImageUpload({ value, onChange }: Props) {
     try {
       const url = await uploadsApi.uploadImage(file, setProgress);
       onChange(url);
-    } catch {
-      setError('업로드에 실패했습니다.');
+    } catch (err) {
+      setError(uploadErrorMessage(err));
     } finally {
       setProgress(null);
     }
@@ -116,7 +116,7 @@ export default function ImageUpload({ value, onChange }: Props) {
         </div>
       )}
 
-      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden"
+      <input ref={inputRef} type="file" accept="image/jpeg,image/png,image/webp,image/gif,image/heic,image/heif,.heic,.heif" className="hidden"
         onChange={e => e.target.files?.[0] && handleFile(e.target.files[0])} />
       <input ref={removeBgRef} type="file" accept="image/jpeg,image/png,image/webp" className="hidden"
         onChange={e => { if (e.target.files?.[0]) { handleFile(e.target.files[0], true); e.target.value = ''; } }} />

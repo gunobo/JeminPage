@@ -380,7 +380,8 @@ def test_upload_rejects_disguised_html(client, auth):
     r = client.post("/api/uploads", headers=auth,
                     files={"file": ("x.html", b"<script>alert(1)</script>", "image/png")})
     assert r.status_code == 400
-    png = b"\x89PNG\r\n\x1a\n" + b"0" * 32
+    from PIL import Image
+    buf = io.BytesIO(); Image.new("RGB", (8, 8)).save(buf, "PNG"); png = buf.getvalue()
     r = client.post("/api/uploads", headers=auth, files={"file": ("evil.html", png, "image/png")})
     assert r.status_code == 200 and r.json()["url"].endswith(".png")
 
@@ -409,3 +410,79 @@ def test_resume_summary_does_not_cut_mid_sentence():
     assert _summary(tp, 160) == tp  # 짧으면 전체
     assert _summary(tp, 80) == "VS Code 확장 프로그램으로, 팀원들의 실시간 코딩 활동을 사이드바에서 확인할 수 있어요."  # 완결된 문장까지
     assert _summary("가" * 300, 160).endswith("…")  # 문장 하나가 너무 길 때만 …
+
+
+# ─── 업로드 형식 판별 ─────────────────────────────────────────────────────────
+
+def _img_bytes(fmt, size=(64, 64), mode="RGB", noise=False):
+    import os as _os
+    from PIL import Image
+    if noise:
+        im = Image.frombytes(mode, size, _os.urandom(size[0] * size[1] * len(mode)))
+    else:
+        im = Image.new(mode, size, (200, 30, 30, 128) if mode == "RGBA" else (200, 30, 30))
+    buf = io.BytesIO()
+    im.save(buf, fmt)
+    return buf.getvalue()
+
+
+def _static_file(url):
+    import os as _os
+    from app.config import settings
+    return _os.path.join(settings.STATIC_DIR, url[len("/static/"):])
+
+
+def test_upload_png_with_wrong_content_type(client, auth):
+    """이름·Content-Type은 jpg인데 내용은 PNG → 내용대로 .png 로 저장."""
+    r = client.post("/api/uploads", headers=auth, files={"file": ("photo.jpg", _img_bytes("PNG"), "image/jpeg")})
+    assert r.status_code == 200, r.text
+    assert r.json()["url"].endswith(".png")
+
+
+def test_upload_large_photo_is_shrunk(client, auth):
+    big = _img_bytes("PNG", size=(3000, 2200), noise=True)  # 노이즈 PNG ≈ 20MB
+    assert 10 * 1024 * 1024 < len(big) <= 25 * 1024 * 1024
+    r = client.post("/api/uploads", headers=auth, files={"file": ("big.png", big, "image/png")})
+    assert r.status_code == 200, r.text
+    url = r.json()["url"]
+    assert url.endswith(".jpg")  # 투명도 없음 → JPEG
+    from PIL import Image
+    im = Image.open(_static_file(url))
+    assert max(im.size) <= 2560
+
+
+def test_upload_transparent_png_keeps_alpha(client, auth):
+    png = _img_bytes("PNG", size=(3000, 3000), mode="RGBA")  # 용량은 작지만 긴 변이 2560 초과
+    r = client.post("/api/uploads", headers=auth, files={"file": ("cutout.png", png, "image/png")})
+    assert r.status_code == 200, r.text
+    from PIL import Image
+    im = Image.open(_static_file(r.json()["url"]))
+    assert r.json()["url"].endswith(".png") and im.mode == "RGBA" and max(im.size) <= 2560
+
+
+def test_upload_small_image_untouched(client, auth):
+    data = _img_bytes("JPEG")
+    r = client.post("/api/uploads", headers=auth, files={"file": ("a.jpeg", data, "image/jpeg")})
+    assert open(_static_file(r.json()["url"]), "rb").read() == data
+
+
+def test_upload_heic_converted(client, auth):
+    pillow_heif = pytest.importorskip("pillow_heif")
+    from PIL import Image
+    pillow_heif.register_heif_opener()
+    buf = io.BytesIO()
+    Image.new("RGB", (120, 80), (10, 120, 200)).save(buf, "HEIF")
+    r = client.post("/api/uploads", headers=auth, files={"file": ("IMG_0001.HEIC", buf.getvalue(), "image/heic")})
+    assert r.status_code == 200, r.text
+    url = r.json()["url"]
+    assert url.endswith(".jpg") and Image.open(_static_file(url)).size == (120, 80)
+
+
+def test_upload_rejects_unknown_and_too_big(client, auth):
+    r = client.post("/api/uploads", headers=auth, files={"file": ("x.png", b"<svg onload=alert(1)>", "image/png")})
+    assert r.status_code == 400 and "올릴 수 있습니다" in r.json()["detail"]
+    huge = b"%PDF-" + b"0" * (25 * 1024 * 1024)
+    r = client.post("/api/uploads", headers=auth, files={"file": ("cv.pdf", huge, "application/pdf")})
+    assert r.status_code == 400 and "25MB" in r.json()["detail"]
+    ok = client.post("/api/uploads", headers=auth, files={"file": ("cv.pdf", b"%PDF-1.4 test", "application/pdf")})
+    assert ok.status_code == 200 and ok.json()["url"].endswith(".pdf")
