@@ -11,9 +11,30 @@ from .service import (
 )
 
 
-def _clip(text: str, n: int) -> str:
+# 문장 끝: 마침표·물음표·느낌표 (+ 닫는 따옴표/괄호) 뒤 공백
+_SENTENCE_END = re.compile(r"(?<=[.!?。])[\"'”’)\]]*\s+")
+
+
+def _summary(text: str, limit: int) -> str:
+    """문장 중간에서 자르지 않는 요약.
+
+    - 전체가 limit 이하면 그대로
+    - 넘으면 limit 안에 들어가는 완결된 문장까지만
+    - 첫 문장 하나가 limit보다 길 때만 단어 경계에서 자르고 … 를 붙인다
+    """
     t = re.sub(r"\s+", " ", text or "").strip()
-    return t if len(t) <= n else t[: n - 1].rstrip() + "…"
+    if len(t) <= limit:
+        return t
+    out = ""
+    for sentence in _SENTENCE_END.split(t):
+        candidate = f"{out} {sentence}".strip()
+        if len(candidate) > limit:
+            break
+        out = candidate
+    if out:
+        return out
+    cut = t[:limit].rsplit(" ", 1)[0].rstrip(",·:;") or t[:limit]
+    return cut + "…"
 
 
 def _education(d: PortfolioData) -> list[dict[str, str]]:
@@ -27,12 +48,11 @@ def _education(d: PortfolioData) -> list[dict[str, str]]:
 def _projects(d: PortfolioData) -> list[dict[str, Any]]:
     out = []
     for p in d.projects:
-        first_line = (p["description"] or "").splitlines()[0] if p["description"] else ""
         out.append({
             "title": p["title"],
             "period": p["period"],
             "role": p["role"],
-            "summary": _clip(first_line, 90),
+            "summary": _summary(p["description"] or "", 160),
             "result": p["results"][0] if p["results"] else "",
             "stack": ", ".join(p["tech_stack"][:5]),
             "awards": p["awards"],
@@ -44,7 +64,7 @@ def _context(d: PortfolioData) -> dict[str, Any]:
     p = d.profile
     return {
         "d": d, "p": p, "contacts": contacts(d), "fmt_date": fmt_date,
-        "bio": _clip(p.bio or "", 220),
+        "bio": _summary(p.bio or "", 260),
         "education": _education(d),
         "projects": _projects(d),
     }

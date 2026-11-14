@@ -400,3 +400,12 @@ def test_otp_bruteforce_limited(client, redis_client, monkeypatch):
     # 비ASCII 입력도 500이 아니라 400
     client.post("/api/contact/otp/send", json={"email": "w@example.com"}, headers=hdr)
     assert client.post("/api/contact/otp/verify", json={"email": "w@example.com", "otp": "한글"}, headers=hdr).status_code == 400
+
+
+def test_resume_summary_does_not_cut_mid_sentence():
+    from app.export.resume import _summary
+    tp = ("VS Code 확장 프로그램으로, 팀원들의 실시간 코딩 활동을 사이드바에서 확인할 수 있어요. "
+          "GitHub OAuth 인증과 방 코드 시스템으로 팀을 구성하고, 서로 어떤 파일을 편집 중인지 실시간으로 공유할 수 있습니다.")
+    assert _summary(tp, 160) == tp  # 짧으면 전체
+    assert _summary(tp, 80) == "VS Code 확장 프로그램으로, 팀원들의 실시간 코딩 활동을 사이드바에서 확인할 수 있어요."  # 완결된 문장까지
+    assert _summary("가" * 300, 160).endswith("…")  # 문장 하나가 너무 길 때만 …
