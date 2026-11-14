@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { projectsApi, statsApi, profileApi, organizationsApi, certificationsApi, awardsApi } from '../api';
-import DownloadMenu from '../components/ui/DownloadMenu';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { useLang } from '../context/LanguageContext';
 import type { Project, VisitorStats, Profile, Organization, Certification, Award } from '../types';
@@ -260,7 +259,10 @@ export default function Home() {
                 className="group flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white border border-white/20 px-7 py-4 hover:bg-white hover:text-black transition-all duration-300">
                 Projects <span className="group-hover:translate-x-1 transition-transform">→</span>
               </Link>
-              <DownloadMenu uploadedCvUrl={uploadedCv} align="left" label="Portfolio" />
+              {uploadedCv && (
+                <a href={uploadedCv} download target="_blank" rel="noreferrer"
+                  className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors">CV ↓</a>
+              )}
               <Link to="/contact"
                 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors">Contact</Link>
             </div>

@@ -11,6 +11,7 @@ from starlette.concurrency import run_in_threadpool
 from ..common import data_version
 from ..common.ratelimit import rate_limit
 from ..config import settings
+from ..auth.utils import require_auth
 from ..database import get_db
 from ..profile.models import Profile
 from .service import MEDIA_TYPES, RENDERERS, collect
@@ -51,7 +52,8 @@ def _disposition(name: str, fmt: str) -> str:
     return f"attachment; filename=\"imjemin_portfolio.{fmt}\"; filename*=UTF-8''{quote(utf8, safe='')}"
 
 
-@router.get("/portfolio", dependencies=[Depends(rate_limit("export", 5))])
+# 관리자 전용 — 인증을 먼저 확인하고, 그다음 요청 횟수를 센다
+@router.get("/portfolio", dependencies=[Depends(require_auth), Depends(rate_limit("export", 5))])
 async def export_portfolio(
     format: Literal["pdf", "docx", "md"] = Query("pdf"),
     scope: Literal["featured", "all"] = Query("featured"),

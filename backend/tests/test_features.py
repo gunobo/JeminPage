@@ -215,7 +215,7 @@ def _seed_portfolio(client, auth):
 
 def test_export_markdown(client, auth):
     _seed_portfolio(client, auth)
-    r = client.get("/api/export/portfolio", params={"format": "md"})
+    r = client.get("/api/export/portfolio", params={"format": "md"}, headers=auth)
     assert r.status_code == 200
     assert r.headers["content-type"] == "text/markdown; charset=utf-8"
     cd = r.headers["content-disposition"]
@@ -226,24 +226,24 @@ def test_export_markdown(client, auth):
         assert s in md, s
     assert "두번째" not in md  # 대표 트러블슈팅 1개만
     assert "비공개 프로젝트" not in md  # featured scope
-    assert "비공개 프로젝트" in client.get("/api/export/portfolio", params={"format": "md", "scope": "all"}).content.decode()
+    assert "비공개 프로젝트" in client.get("/api/export/portfolio", params={"format": "md", "scope": "all"}, headers=auth).content.decode()
 
 
 def test_export_cache_invalidated_on_edit(client, auth):
     p = _seed_portfolio(client, auth)
-    first = client.get("/api/export/portfolio", params={"format": "md"}).content.decode()
+    first = client.get("/api/export/portfolio", params={"format": "md"}, headers=auth).content.decode()
     client.put(f"/api/projects/{p['id']}", json={"title": "새 제목", "description": "d", "is_featured": True}, headers=auth)
-    second = client.get("/api/export/portfolio", params={"format": "md"}).content.decode()
+    second = client.get("/api/export/portfolio", params={"format": "md"}, headers=auth).content.decode()
     assert "새 제목" in second and first != second
     # 삭제도 반영 (max(updated_at) 방식이 놓치는 경우)
     client.delete(f"/api/projects/{p['id']}", headers=auth)
-    third = client.get("/api/export/portfolio", params={"format": "md"}).content.decode()
+    third = client.get("/api/export/portfolio", params={"format": "md"}, headers=auth).content.decode()
     assert "새 제목" not in third
 
 
 def test_export_docx(client, auth):
     _seed_portfolio(client, auth)
-    r = client.get("/api/export/portfolio", params={"format": "docx"})
+    r = client.get("/api/export/portfolio", params={"format": "docx"}, headers=auth)
     assert r.status_code == 200
     assert r.headers["content-type"].startswith("application/vnd.openxmlformats-officedocument.wordprocessingml.document")
     from docx import Document
@@ -255,7 +255,7 @@ def test_export_pdf(client, auth):
     pytest.importorskip("weasyprint")
     _seed_portfolio(client, auth)
     t0 = time.time()
-    r = client.get("/api/export/portfolio", params={"format": "pdf"})
+    r = client.get("/api/export/portfolio", params={"format": "pdf"}, headers=auth)
     elapsed = time.time() - t0
     assert r.status_code == 200, r.text
     assert r.headers["content-type"] == "application/pdf" and r.content[:5] == b"%PDF-"
@@ -277,14 +277,21 @@ def test_export_pdf_blocks_external_urls(migrated):
             _safe_url_fetcher(bad)
 
 
-def test_export_rate_limit(client):
-    hdr = {"X-Real-IP": "10.1.1.1"}
+def test_export_requires_admin(client):
+    r = client.get("/api/export/portfolio", params={"format": "md"})
+    assert r.status_code == 401
+    bad = {"Authorization": "Bearer not-a-jwt"}
+    assert client.get("/api/export/portfolio", params={"format": "md"}, headers=bad).status_code == 401
+
+
+def test_export_rate_limit(client, auth):
+    hdr = {"X-Real-IP": "10.1.1.1", **auth}
     codes = [client.get("/api/export/portfolio", params={"format": "md"}, headers=hdr).status_code for _ in range(6)]
     assert codes[:5] == [200] * 5 and codes[5] == 429
 
 
-def test_export_rejects_bad_format(client):
-    assert client.get("/api/export/portfolio", params={"format": "exe"}).status_code == 422
+def test_export_rejects_bad_format(client, auth):
+    assert client.get("/api/export/portfolio", params={"format": "exe"}, headers=auth).status_code == 422
 
 
 # ─── F4 ──────────────────────────────────────────────────────────────────────

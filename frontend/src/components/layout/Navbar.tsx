@@ -1,20 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useLang } from '../../context/LanguageContext';
-import { profileApi } from '../../api';
-import DownloadMenu from '../ui/DownloadMenu';
 
 export default function Navbar() {
   const { pathname } = useLocation();
   const [open, setOpen] = useState(false);
   const { lang, toggle, t } = useLang();
-  const [uploadedCv, setUploadedCv] = useState<string | undefined>();
-
-  useEffect(() => {
-    profileApi.get()
-      .then(p => setUploadedCv(p.cv_mode === 'upload' && p.cv_url ? p.cv_url : undefined))
-      .catch(() => {});
-  }, []);
 
   const links = [
     { to: '/', label: t('home') },
@@ -46,9 +37,6 @@ export default function Navbar() {
               </Link>
             </li>
           ))}
-          <li>
-            <DownloadMenu uploadedCvUrl={uploadedCv} />
-          </li>
           <li>
             <button onClick={toggle}
               className="text-xs font-semibold tracking-widest uppercase text-white opacity-40 hover:opacity-100 transition-opacity">
@@ -93,9 +81,6 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
-          <div className="pt-6">
-            <DownloadMenu uploadedCvUrl={uploadedCv} align="left" />
-          </div>
           <button
             onClick={() => { toggle(); setOpen(false); }}
             className="text-white/30 text-sm font-semibold uppercase tracking-widest text-left pt-6 hover:text-white/60 transition-colors">

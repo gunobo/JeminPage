@@ -4,6 +4,7 @@ import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi, organi
 import ImageUpload from '../components/ui/ImageUpload';
 import FileUpload from '../components/ui/FileUpload';
 import GoogleLoginButton from '../components/ui/GoogleLoginButton';
+import DownloadMenu from '../components/ui/DownloadMenu';
 import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost, Organization, Certification, VelogPost, Award, AdminUser, AuthConfig } from '../types';
 import { normalizeSkill } from '../types';
 
@@ -472,9 +473,9 @@ function ProfileTab() {
       <div className="border border-white/10 p-8 space-y-8">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-2">CV / Resume</p>
-          <p className="text-xs text-white/20 mb-4">Download 메뉴의 PDF 항목에 무엇을 연결할지 고릅니다. Word·Markdown은 항상 자동 생성입니다.</p>
+          <p className="text-xs text-white/20 mb-4">업로드한 CV PDF를 홈 화면 "CV ↓" 버튼으로 방문자에게 공개할지 고릅니다. 자동 생성 문서(PDF·Word·Markdown)는 관리자 상단의 Download 메뉴에서만 받을 수 있습니다.</p>
           <div className="flex gap-2 mb-4">
-            {([['generated', '자동 생성 사용'], ['upload', '업로드한 CV 사용']] as const).map(([mode, label]) => (
+            {([['generated', '홈에 표시 안 함'], ['upload', '홈에 CV 버튼 표시']] as const).map(([mode, label]) => (
               <button key={mode} type="button" onClick={() => setForm({ ...form, cv_mode: mode })}
                 className={`px-4 py-2 text-xs font-semibold uppercase tracking-widest border transition-colors ${
                   form.cv_mode === mode ? 'border-white text-white' : 'border-white/10 text-white/30 hover:text-white/60'}`}>
@@ -483,7 +484,7 @@ function ProfileTab() {
             ))}
           </div>
           {form.cv_mode === 'upload' && !form.cv_url && (
-            <p className="text-xs text-amber-300/70 mb-3">CV PDF를 올리지 않으면 자동 생성 문서가 대신 내려갑니다.</p>
+            <p className="text-xs text-amber-300/70 mb-3">CV PDF를 올려야 홈에 버튼이 나타납니다.</p>
           )}
           <FileUpload
             value={form.cv_url}
@@ -1402,7 +1403,8 @@ export default function Admin() {
             <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-1">대시보드</p>
             <h1 className="font-black text-3xl tracking-tighter">관리자</h1>
           </div>
-          <div className="flex items-center gap-4 min-w-0">
+          <div className="flex items-center gap-6 min-w-0">
+            <DownloadMenu label="Portfolio" />
             {user && (
               <div className="flex items-center gap-3 min-w-0">
                 {user.picture
