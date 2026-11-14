@@ -1,14 +1,40 @@
 services:
   db:
-    image: mariadb:11
+    image: postgres:16-alpine
     restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-homepage}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    # Pi 메모리 절약 (4GB에 컨테이너가 많음)
+    command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=30", "-c", "work_mem=4MB"]
+    ports:
+      # 외부(LAN)에는 열지 않는다. DB 툴은 SSH 터널로 127.0.0.1:5433 에 접속
+      - "127.0.0.1:5433:5432"
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      retries: 10
+      start_period: 20s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 이전용 — 기존 MariaDB 데이터(mysql_data 볼륨)를 읽기 위해서만 잠깐 띄운다.
+  # `docker compose --profile legacy up -d mariadb` 로만 실행되고 평소엔 꺼져 있다.
+  # 이전이 끝나고 확인되면 이 서비스와 mysql_data 볼륨을 지워도 된다.
+  mariadb:
+    image: mariadb:11
+    profiles: ["legacy"]
     environment:
       MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MARIADB_DATABASE: homepage
       MARIADB_USER: ${MYSQL_USER}
       MARIADB_PASSWORD: ${MYSQL_PASSWORD}
-    ports:
-      - "3312:3306"
     volumes:
       - mysql_data:/var/lib/mysql
     healthcheck:
@@ -16,11 +42,6 @@ services:
       interval: 10s
       retries: 10
       start_period: 30s
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
 
   redis:
     image: redis:7-alpine
@@ -72,5 +93,6 @@ services:
         max-file: "2"
 
 volumes:
+  pg_data:
   mysql_data:
   uploads_data:

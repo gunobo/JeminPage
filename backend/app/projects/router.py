@@ -9,7 +9,7 @@ router = APIRouter(prefix="/projects", tags=["projects"])
 
 
 def ordered(query):
-    # sort_order ASC NULLS LAST, created_at ASC (MariaDB엔 NULLS LAST가 없어서 IS NULL로 대체)
+    # sort_order ASC NULLS LAST, created_at ASC (DB 종류와 무관하게 IS NULL 정렬로 표현)
     return query.order_by(Project.sort_order.is_(None), Project.sort_order.asc(), Project.created_at.asc(), Project.id.asc())
 
 

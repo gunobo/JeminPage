@@ -12,7 +12,7 @@
 |------|------|
 | Frontend | React (TSX) + Vite + Tailwind CSS v4 |
 | Backend | FastAPI + SQLAlchemy ORM |
-| Database | MariaDB 11 |
+| Database | PostgreSQL 16 |
 | Cache | Redis 7 |
 | Infra | Docker Compose + nginx + Cloudflare Tunnel |
 | Email | Cloudflare Email Routing + Gmail SMTP |

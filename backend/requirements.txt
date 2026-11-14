@@ -1,6 +1,8 @@
 fastapi==0.115.0
 uvicorn[standard]==0.30.6
 sqlalchemy==2.0.35
+psycopg[binary]==3.2.3
+# MariaDB → PostgreSQL 데이터 이전(app.tools.copy_from_mariadb)에서만 사용
 pymysql==1.1.1
 cryptography==43.0.1
 redis==5.0.8
