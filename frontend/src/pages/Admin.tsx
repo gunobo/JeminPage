@@ -1,48 +1,105 @@
 import { useEffect, useRef, useState } from 'react';
-import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi, organizationsApi, certificationsApi, velogApi } from '../api';
+import axios from 'axios';
+import { projectsApi, authApi, statsApi, contactApi, profileApi, blogApi, organizationsApi, certificationsApi, velogApi, awardsApi } from '../api';
 import ImageUpload from '../components/ui/ImageUpload';
 import FileUpload from '../components/ui/FileUpload';
-import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost, Organization, Certification, VelogPost } from '../types';
+import GoogleLoginButton from '../components/ui/GoogleLoginButton';
+import type { Project, ContactMessage, VisitorStats, Profile, SkillGroup, BlogPost, Organization, Certification, VelogPost, Award, AdminUser, AuthConfig } from '../types';
 import { normalizeSkill } from '../types';
 
 const inputCls = 'w-full bg-white/5 border border-white/10 text-white placeholder-white/20 px-4 py-3 focus:outline-none focus:border-white/30 transition-colors text-sm';
 const btnPrimary = 'px-6 py-3 bg-white text-black text-xs font-black uppercase tracking-widest hover:bg-white/80 transition-colors';
 const btnSecondary = 'px-6 py-3 border border-white/10 text-white/50 text-xs font-semibold uppercase tracking-widest hover:border-white/30 hover:text-white transition-colors';
 
+function apiError(err: unknown, fallback: string) {
+  if (axios.isAxiosError(err)) {
+    const detail = err.response?.data?.detail;
+    if (typeof detail === 'string') return detail;
+    if (err.response?.status === 429) return '요청이 너무 많습니다. 잠시 후 다시 시도해주세요.';
+  }
+  return fallback;
+}
+
 // ─── Auth ────────────────────────────────────────────────────────────────────
 
+const BUILD_CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+
 function LoginForm({ onLogin }: { onLogin: () => void }) {
+  const [config, setConfig] = useState<AuthConfig | null>(null);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    authApi.config().then(setConfig).catch(() => setConfig({ google_client_id: '', password_login: false }));
+  }, []);
+
+  const finish = (token: string) => {
+    localStorage.setItem('token', token);
+    onLogin();
+  };
+
+  const handleGoogle = async (credential: string) => {
+    setError(''); setBusy(true);
     try {
-      const { access_token } = await authApi.login(password);
-      localStorage.setItem('token', access_token);
-      onLogin();
-    } catch {
-      setError('비밀번호가 틀렸습니다.');
+      finish((await authApi.google(credential)).access_token);
+    } catch (err) {
+      setError(apiError(err, '로그인에 실패했습니다.'));
+    } finally {
+      setBusy(false);
     }
   };
+
+  const handlePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(''); setBusy(true);
+    try {
+      finish((await authApi.login(password)).access_token);
+    } catch (err) {
+      setError(axios.isAxiosError(err) && err.response?.status === 401 ? '비밀번호가 틀렸습니다.' : apiError(err, '로그인에 실패했습니다.'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const clientId = BUILD_CLIENT_ID || config?.google_client_id || '';
 
   return (
     <main className="min-h-screen bg-[#0a0a0a] flex items-center justify-center px-6">
       <div className="w-full max-w-sm">
         <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-4">관리자</p>
         <h1 className="font-black text-4xl tracking-tighter mb-10">로그인</h1>
-        <form onSubmit={handleSubmit} className="space-y-0">
-          <input
-            type="password" required value={password}
-            onChange={e => setPassword(e.target.value)}
-            className={inputCls}
-            placeholder="비밀번호"
-          />
-          {error && <p className="text-red-400 text-xs uppercase tracking-widest pt-3">{error}</p>}
-          <button type="submit" className={`${btnPrimary} w-full mt-4 py-4`}>
-            입장 →
-          </button>
-        </form>
+
+        {!config ? (
+          <div className="w-6 h-6 border border-white/20 border-t-white rounded-full animate-spin" />
+        ) : (
+          <div className="space-y-6">
+            {clientId
+              ? <GoogleLoginButton clientId={clientId} onCredential={handleGoogle} />
+              : <p className="text-white/30 text-xs">Google 로그인이 설정되지 않았습니다 (GOOGLE_CLIENT_ID).</p>}
+            {busy && <p className="text-white/30 text-xs text-center animate-pulse">확인 중...</p>}
+            {error && <p className="text-red-400 text-xs text-center" role="alert">{error}</p>}
+
+            {config.password_login && (
+              <details className="border-t border-white/10 pt-6">
+                <summary className="cursor-pointer text-[11px] font-semibold tracking-widest text-white/30 uppercase hover:text-white/60 list-none">
+                  비상 로그인 ▾
+                </summary>
+                <form onSubmit={handlePassword} className="mt-4">
+                  <input
+                    type="password" required value={password} autoComplete="current-password"
+                    onChange={e => setPassword(e.target.value)}
+                    className={inputCls}
+                    placeholder="비밀번호"
+                  />
+                  <button type="submit" disabled={busy} className={`${btnSecondary} w-full mt-3 py-3 disabled:opacity-40`}>
+                    입장 →
+                  </button>
+                </form>
+              </details>
+            )}
+          </div>
+        )}
       </div>
     </main>
   );
@@ -53,30 +110,63 @@ function LoginForm({ onLogin }: { onLogin: () => void }) {
 const EMPTY_FORM = {
   title: '', description: '', tech_stack: [] as string[],
   github_url: '', demo_url: '', thumbnail_url: '', is_featured: false, category: '',
+  period: '', team: '', role: '', problem: '', troubleshooting: '', results: '',
 };
+
+const TROUBLE_PLACEHOLDER = `## 라즈베리파이 메모리 부족으로 컨테이너 재시작
+원인: MariaDB 기본 buffer pool이 너무 큼
+해결: innodb_buffer_pool_size 128M로 제한, swap 2GB 추가
+결과: OOM 재시작 0회 (2주 기준)
+
+## 다음 항목 제목
+...`;
 
 function ProjectsTab() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [form, setForm] = useState(EMPTY_FORM);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [techInput, setTechInput] = useState('');
+  const [error, setError] = useState('');
 
   const refresh = () => projectsApi.list().then(setProjects);
   useEffect(() => { refresh(); }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingId) await projectsApi.update(editingId, form);
-    else await projectsApi.create(form);
-    setForm(EMPTY_FORM); setEditingId(null); refresh();
+    setError('');
+    // 성과: 줄마다 1개, 빈 줄 제거
+    const payload = { ...form, results: form.results.split('\n').map(s => s.trim()).filter(Boolean) };
+    try {
+      if (editingId) await projectsApi.update(editingId, payload);
+      else await projectsApi.create(payload);
+      setForm(EMPTY_FORM); setEditingId(null); refresh();
+    } catch (err) {
+      setError(apiError(err, '저장에 실패했습니다.'));
+    }
   };
 
   const handleEdit = (p: Project) => {
     setEditingId(p.id);
     setForm({ title: p.title, description: p.description, tech_stack: p.tech_stack,
       github_url: p.github_url || '', demo_url: p.demo_url || '',
-      thumbnail_url: p.thumbnail_url || '', is_featured: p.is_featured, category: p.category || '' });
+      thumbnail_url: p.thumbnail_url || '', is_featured: p.is_featured, category: p.category || '',
+      period: p.period || '', team: p.team || '', role: p.role || '', problem: p.problem || '',
+      troubleshooting: p.troubleshooting || '', results: (p.results || []).join('\n') });
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const move = async (index: number, dir: -1 | 1) => {
+    const next = index + dir;
+    if (next < 0 || next >= projects.length) return;
+    const reordered = [...projects];
+    [reordered[index], reordered[next]] = [reordered[next], reordered[index]];
+    setProjects(reordered);
+    try {
+      await projectsApi.reorder(reordered.map(p => p.id));
+    } catch (err) {
+      setError(apiError(err, '순서 저장에 실패했습니다.'));
+      refresh();
+    }
   };
 
   const handleDelete = async (id: number) => {
@@ -103,7 +193,35 @@ function ProjectsTab() {
             placeholder="프로젝트 제목" className={inputCls} />
           <textarea required rows={3} value={form.description}
             onChange={e => setForm({ ...form, description: e.target.value })}
-            placeholder="설명" className={`${inputCls} resize-none`} />
+            placeholder="설명 (줄바꿈 유지)" className={`${inputCls} resize-y`} />
+
+          {/* 케이스 스터디 */}
+          <div className="border border-white/5 p-4 space-y-4">
+            <p className="text-[11px] font-semibold tracking-widest text-white/20 uppercase">케이스 스터디 (선택)</p>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <input value={form.period} maxLength={100}
+                onChange={e => setForm({ ...form, period: e.target.value })}
+                placeholder="기간 (2026.03 ~ 2026.06)" className={inputCls} />
+              <input value={form.team} maxLength={200}
+                onChange={e => setForm({ ...form, team: e.target.value })}
+                placeholder="팀 (4인 · FE2 BE2)" className={inputCls} />
+              <input value={form.role} maxLength={200}
+                onChange={e => setForm({ ...form, role: e.target.value })}
+                placeholder="역할 (백엔드 리드)" className={inputCls} />
+            </div>
+            <textarea rows={3} value={form.problem}
+              onChange={e => setForm({ ...form, problem: e.target.value })}
+              placeholder="문제 — 해결하려던 문제, 만든 이유" className={`${inputCls} resize-y`} />
+            <div>
+              <textarea rows={8} value={form.troubleshooting}
+                onChange={e => setForm({ ...form, troubleshooting: e.target.value })}
+                placeholder={TROUBLE_PLACEHOLDER} className={`${inputCls} resize-y font-mono text-xs leading-relaxed`} />
+              <p className="text-[11px] text-white/20 mt-1">트러블슈팅 — <code>## 제목</code> 줄로 항목을 나눕니다. 첫 항목이 상세 페이지에서 펼쳐지고 PDF에 들어갑니다.</p>
+            </div>
+            <textarea rows={3} value={form.results}
+              onChange={e => setForm({ ...form, results: e.target.value })}
+              placeholder={'성과 — 줄마다 1개\n전교생 300명 사용\n응답 1.2s → 0.3s'} className={`${inputCls} resize-y`} />
+          </div>
 
           <div className="flex gap-2">
             <input value={techInput}
@@ -152,6 +270,7 @@ function ProjectsTab() {
             <span className="text-sm text-white/40 group-hover:text-white/60 transition-colors">메인 페이지에 표시</span>
           </label>
 
+          {error && <p className="text-red-400 text-xs" role="alert">{error}</p>}
           <div className="flex gap-3 pt-2">
             <button type="submit" className={btnPrimary}>{editingId ? '수정 완료' : '추가하기'}</button>
             {editingId && (
@@ -167,6 +286,7 @@ function ProjectsTab() {
         <table className="w-full text-sm">
           <thead className="border-b border-white/10">
             <tr>
+              <th className="px-2 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase w-14">순서</th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase w-12"></th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">제목</th>
               <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden sm:table-cell">스택</th>
@@ -175,8 +295,16 @@ function ProjectsTab() {
             </tr>
           </thead>
           <tbody className="divide-y divide-white/5">
-            {projects.map(p => (
+            {projects.map((p, i) => (
               <tr key={p.id} className="hover:bg-white/[0.02] transition-colors">
+                <td className="px-2 py-3">
+                  <div className="flex flex-col items-center leading-none">
+                    <button type="button" onClick={() => move(i, -1)} disabled={i === 0} aria-label="위로"
+                      className="text-white/30 hover:text-white disabled:opacity-10 px-2 py-0.5">▲</button>
+                    <button type="button" onClick={() => move(i, 1)} disabled={i === projects.length - 1} aria-label="아래로"
+                      className="text-white/30 hover:text-white disabled:opacity-10 px-2 py-0.5">▼</button>
+                  </div>
+                </td>
                 <td className="px-4 py-3">
                   {p.thumbnail_url
                     ? <img src={p.thumbnail_url} alt="" className="w-10 h-10 object-cover opacity-60" />
@@ -194,7 +322,7 @@ function ProjectsTab() {
               </tr>
             ))}
             {projects.length === 0 && (
-              <tr><td colSpan={5} className="px-6 py-12 text-center text-white/20 text-xs uppercase tracking-widest">아직 프로젝트가 없습니다.</td></tr>
+              <tr><td colSpan={6} className="px-6 py-12 text-center text-white/20 text-xs uppercase tracking-widest">아직 프로젝트가 없습니다.</td></tr>
             )}
           </tbody>
         </table>
@@ -273,7 +401,7 @@ function MessagesTab() {
 
 const EMPTY_PROFILE: Profile = {
   name: '', tagline: '', bio: '', github_url: '', email: '',
-  portfolio_url: '', avatar_url: '', discord: '', cv_url: '', og_image_url: '', skill_groups: [], yearly_goals: [], marquee_items: [],
+  portfolio_url: '', avatar_url: '', discord: '', cv_url: '', og_image_url: '', cv_mode: 'generated', skill_groups: [], yearly_goals: [], marquee_items: [],
 };
 
 function ProfileTab() {
@@ -344,7 +472,19 @@ function ProfileTab() {
       <div className="border border-white/10 p-8 space-y-8">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-2">CV / Resume</p>
-          <p className="text-xs text-white/20 mb-4">PDF 파일 — 홈 화면 "CV ↓" 버튼에 연결됩니다.</p>
+          <p className="text-xs text-white/20 mb-4">Download 메뉴의 PDF 항목에 무엇을 연결할지 고릅니다. Word·Markdown은 항상 자동 생성입니다.</p>
+          <div className="flex gap-2 mb-4">
+            {([['generated', '자동 생성 사용'], ['upload', '업로드한 CV 사용']] as const).map(([mode, label]) => (
+              <button key={mode} type="button" onClick={() => setForm({ ...form, cv_mode: mode })}
+                className={`px-4 py-2 text-xs font-semibold uppercase tracking-widest border transition-colors ${
+                  form.cv_mode === mode ? 'border-white text-white' : 'border-white/10 text-white/30 hover:text-white/60'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+          {form.cv_mode === 'upload' && !form.cv_url && (
+            <p className="text-xs text-amber-300/70 mb-3">CV PDF를 올리지 않으면 자동 생성 문서가 대신 내려갑니다.</p>
+          )}
           <FileUpload
             value={form.cv_url}
             accept="application/pdf"
@@ -920,6 +1060,132 @@ function CertificationsTab() {
   );
 }
 
+// ─── Awards tab ───────────────────────────────────────────────────────────────
+
+const EMPTY_AWARD: Omit<Award, 'id'> = {
+  title: '', competition: '', organizer: '', awarded_date: null, project_id: null,
+  description: '', link_url: '', sort_order: null,
+};
+
+function AwardsTab() {
+  const [awards, setAwards] = useState<Award[]>([]);
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [form, setForm] = useState(EMPTY_AWARD);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [error, setError] = useState('');
+
+  const refresh = () => awardsApi.list().then(setAwards);
+  useEffect(() => { refresh(); projectsApi.list().then(setProjects).catch(() => {}); }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    try {
+      if (editingId) await awardsApi.update(editingId, form);
+      else await awardsApi.create(form);
+      setForm(EMPTY_AWARD); setEditingId(null); refresh();
+    } catch (err) {
+      setError(apiError(err, '저장에 실패했습니다. 링크는 https:// 로 시작해야 합니다.'));
+    }
+  };
+
+  const handleEdit = (a: Award) => {
+    setEditingId(a.id);
+    setForm({ title: a.title, competition: a.competition, organizer: a.organizer || '', awarded_date: a.awarded_date,
+      project_id: a.project_id, description: a.description || '', link_url: a.link_url || '', sort_order: a.sort_order });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (id: number) => {
+    if (!confirm('삭제하시겠습니까?')) return;
+    await awardsApi.delete(id); refresh();
+  };
+
+  const projectTitle = (id: number | null) => projects.find(p => p.id === id)?.title;
+
+  return (
+    <div className="space-y-6">
+      <div className="border border-white/10 p-8">
+        <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-6">
+          {editingId ? '수상 수정' : '수상 추가'}
+        </p>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-[1fr_2fr] gap-4">
+            <input required value={form.title} maxLength={200}
+              onChange={e => setForm({ ...form, title: e.target.value })}
+              placeholder="상 이름 (예: 우수상)" className={inputCls} />
+            <input required value={form.competition} maxLength={200}
+              onChange={e => setForm({ ...form, competition: e.target.value })}
+              placeholder="대회명 (예: 제11회 전국 고등학교 동아리 AI·SW경진대회)" className={inputCls} />
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <input value={form.organizer ?? ''} maxLength={200}
+              onChange={e => setForm({ ...form, organizer: e.target.value })}
+              placeholder="주최 (예: KAIST 외)" className={inputCls} />
+            <input type="date" value={form.awarded_date ?? ''}
+              onChange={e => setForm({ ...form, awarded_date: e.target.value || null })}
+              className={inputCls} />
+            <select value={form.project_id ?? ''}
+              onChange={e => setForm({ ...form, project_id: e.target.value ? Number(e.target.value) : null })}
+              className={`${inputCls} [&>option]:bg-[#111]`}>
+              <option value="">출품작 연결 안 함</option>
+              {projects.map(p => <option key={p.id} value={p.id}>{p.title}</option>)}
+            </select>
+          </div>
+          <textarea rows={2} value={form.description ?? ''}
+            onChange={e => setForm({ ...form, description: e.target.value })}
+            placeholder="설명 (선택)" className={`${inputCls} resize-y`} />
+          <input value={form.link_url ?? ''} maxLength={500}
+            onChange={e => setForm({ ...form, link_url: e.target.value })}
+            placeholder="기사·공지 링크 (https://...)" className={inputCls} />
+          {error && <p className="text-red-400 text-xs" role="alert">{error}</p>}
+          <div className="flex gap-3 pt-2">
+            <button type="submit" className={btnPrimary}>{editingId ? '수정 완료' : '추가하기'}</button>
+            {editingId && (
+              <button type="button" onClick={() => { setEditingId(null); setForm(EMPTY_AWARD); }}
+                className={btnSecondary}>취소</button>
+            )}
+          </div>
+        </form>
+      </div>
+
+      <div className="border border-white/10 overflow-hidden">
+        <table className="w-full text-sm">
+          <thead className="border-b border-white/10">
+            <tr>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">날짜</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase">수상</th>
+              <th className="px-4 py-3 text-left text-[11px] font-semibold tracking-widest text-white/20 uppercase hidden sm:table-cell">출품작</th>
+              <th className="px-4 py-3 text-right text-[11px] font-semibold tracking-widest text-white/20 uppercase">관리</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {awards.map(a => (
+              <tr key={a.id} className="hover:bg-white/[0.02] transition-colors">
+                <td className="px-4 py-3 text-white/30 text-xs whitespace-nowrap">{a.awarded_date ?? '—'}</td>
+                <td className="px-4 py-3">
+                  <p className="font-medium text-white/70">{a.title}</p>
+                  <p className="text-xs text-white/30">{a.competition}</p>
+                </td>
+                <td className="px-4 py-3 text-white/30 text-xs hidden sm:table-cell">{projectTitle(a.project_id) ?? '—'}</td>
+                <td className="px-4 py-3 text-right whitespace-nowrap">
+                  <button onClick={() => handleEdit(a)}
+                    className="text-xs text-white/30 hover:text-white transition-colors mr-4 uppercase tracking-widest">수정</button>
+                  <button onClick={() => handleDelete(a.id)}
+                    className="text-xs text-red-400/50 hover:text-red-400 transition-colors uppercase tracking-widest">삭제</button>
+                </td>
+              </tr>
+            ))}
+            {awards.length === 0 && (
+              <tr><td colSpan={4} className="px-6 py-12 text-center text-white/20 text-xs uppercase tracking-widest">등록된 수상이 없습니다.</td></tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
 // ─── Organizations tab ────────────────────────────────────────────────────────
 
 const EMPTY_ORG: Omit<Organization, 'id'> = {
@@ -1036,7 +1302,7 @@ function OrganizationsTab() {
 
 // ─── Dashboard ────────────────────────────────────────────────────────────────
 
-type Tab = 'projects' | 'messages' | 'profile' | 'blog' | 'organizations' | 'certifications' | 'velog';
+type Tab = 'projects' | 'messages' | 'profile' | 'blog' | 'organizations' | 'certifications' | 'velog' | 'awards';
 
 function VisitorChart() {
   const [data, setData] = useState<{ date: string; count: number }[]>([]);
@@ -1108,18 +1374,22 @@ export default function Admin() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const [tab, setTab] = useState<Tab>('profile');
   const [stats, setStats] = useState<VisitorStats | null>(null);
+  const [user, setUser] = useState<AdminUser | null>(null);
 
   useEffect(() => {
-    const onLogout = () => setIsLoggedIn(false);
+    const onLogout = () => { setIsLoggedIn(false); setUser(null); };
     window.addEventListener('auth:logout', onLogout);
     return () => window.removeEventListener('auth:logout', onLogout);
   }, []);
 
   useEffect(() => {
-    if (isLoggedIn) statsApi.get().then(setStats).catch(() => {});
+    if (!isLoggedIn) return;
+    // 토큰이 만료됐으면 401 → 인터셉터가 auth:logout 발생
+    authApi.me().then(setUser).catch(() => {});
+    statsApi.get().then(setStats).catch(() => {});
   }, [isLoggedIn]);
 
-  const handleLogout = () => { localStorage.removeItem('token'); setIsLoggedIn(false); };
+  const handleLogout = () => { localStorage.removeItem('token'); setUser(null); setIsLoggedIn(false); };
 
   if (!isLoggedIn) return <LoginForm onLogin={() => setIsLoggedIn(true)} />;
 
@@ -1132,10 +1402,23 @@ export default function Admin() {
             <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-1">대시보드</p>
             <h1 className="font-black text-3xl tracking-tighter">관리자</h1>
           </div>
-          <button onClick={handleLogout}
-            className="text-xs font-semibold uppercase tracking-widest text-white/20 hover:text-white transition-colors">
-            로그아웃 →
-          </button>
+          <div className="flex items-center gap-4 min-w-0">
+            {user && (
+              <div className="flex items-center gap-3 min-w-0">
+                {user.picture
+                  ? <img src={user.picture} alt="" referrerPolicy="no-referrer" className="w-8 h-8 rounded-full ring-1 ring-white/10 shrink-0" />
+                  : <div className="w-8 h-8 rounded-full bg-white/10 shrink-0" />}
+                <div className="min-w-0 hidden sm:block">
+                  <p className="text-sm text-white/70 truncate">{user.name || user.email}</p>
+                  <p className="text-[11px] text-white/30 truncate">{user.email}</p>
+                </div>
+              </div>
+            )}
+            <button onClick={handleLogout}
+              className="text-xs font-semibold uppercase tracking-widest text-white/20 hover:text-white transition-colors shrink-0">
+              로그아웃 →
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
@@ -1164,10 +1447,10 @@ export default function Admin() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-0 mb-8 border-b border-white/10">
-          {([['profile', '프로필'], ['projects', '프로젝트'], ['organizations', '활동'], ['certifications', '자격증'], ['blog', '블로그'], ['velog', 'Velog'], ['messages', '메시지']] as [Tab, string][]).map(([t, label]) => (
+        <div className="flex gap-0 mb-8 border-b border-white/10 overflow-x-auto">
+          {([['profile', '프로필'], ['projects', '프로젝트'], ['awards', '수상'], ['organizations', '활동'], ['certifications', '자격증'], ['blog', '블로그'], ['velog', 'Velog'], ['messages', '메시지']] as [Tab, string][]).map(([t, label]) => (
             <button key={t} onClick={() => setTab(t)}
-              className={`px-6 py-3 text-xs font-black uppercase tracking-widest border-b-2 -mb-px transition-colors ${
+              className={`px-6 py-3 text-xs font-black uppercase tracking-widest border-b-2 -mb-px transition-colors whitespace-nowrap ${
                 tab === t ? 'border-white text-white' : 'border-transparent text-white/20 hover:text-white/50'
               }`}>
               {label}
@@ -1177,6 +1460,7 @@ export default function Admin() {
 
         {tab === 'profile' && <ProfileTab />}
         {tab === 'projects' && <ProjectsTab />}
+        {tab === 'awards' && <AwardsTab />}
         {tab === 'organizations' && <OrganizationsTab />}
         {tab === 'certifications' && <CertificationsTab />}
         {tab === 'blog' && <BlogTab />}

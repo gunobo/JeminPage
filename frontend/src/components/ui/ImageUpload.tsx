@@ -1,6 +1,5 @@
 import { useRef, useState } from 'react';
 import { uploadsApi } from '../../api';
-import { removeBackground } from '@imgly/background-removal';
 
 interface Props {
   value: string;
@@ -30,6 +29,8 @@ export default function ImageUpload({ value, onChange }: Props) {
     if (removeBg) {
       setRemovingBg(true);
       try {
+        // onnx 런타임(수 MB)은 버튼을 눌렀을 때만 내려받는다
+        const { removeBackground } = await import('@imgly/background-removal');
         const blob = await removeBackground(file);
         const processed = new File([blob], file.name.replace(/\.[^.]+$/, '.png'), { type: 'image/png' });
         await uploadFile(processed);

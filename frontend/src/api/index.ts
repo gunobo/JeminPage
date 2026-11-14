@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Project, ContactForm, ContactMessage, VisitorStats, Profile, BlogPost, Organization, Certification, VelogPost } from '../types';
+import type { Project, ContactForm, ContactMessage, VisitorStats, Profile, BlogPost, Organization, Certification, VelogPost, Award, AdminUser, AuthConfig, ExportFormat } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -29,6 +29,41 @@ export const projectsApi = {
   create: (data: Omit<Project, 'id' | 'created_at'>) => api.post<Project>('/projects', data).then(r => r.data),
   update: (id: number, data: Partial<Project>) => api.put<Project>(`/projects/${id}`, data).then(r => r.data),
   delete: (id: number) => api.delete(`/projects/${id}`),
+  reorder: (ids: number[]) => api.put('/projects/order', { ids }),
+};
+
+export const awardsApi = {
+  list: () => api.get<Award[]>('/awards').then(r => r.data),
+  create: (data: Omit<Award, 'id'>) => api.post<Award>('/awards', data).then(r => r.data),
+  update: (id: number, data: Omit<Award, 'id'>) => api.put<Award>(`/awards/${id}`, data).then(r => r.data),
+  delete: (id: number) => api.delete(`/awards/${id}`),
+};
+
+/** Content-Disposition의 filename*=UTF-8''... 를 우선 사용 */
+function filenameFrom(disposition: string | undefined, fallback: string) {
+  if (!disposition) return fallback;
+  const star = /filename\*=UTF-8''([^;]+)/i.exec(disposition);
+  if (star) {
+    try { return decodeURIComponent(star[1]); } catch { /* fallthrough */ }
+  }
+  const plain = /filename="?([^";]+)"?/i.exec(disposition);
+  return plain ? plain[1] : fallback;
+}
+
+export const exportApi = {
+  /** nginx가 X-Requested-From 없는 /api 요청을 막으므로 <a href> 대신 axios로 받아 저장한다 */
+  download: async (format: ExportFormat, scope: 'featured' | 'all' = 'featured') => {
+    const res = await api.get<Blob>('/export/portfolio', { params: { format, scope }, responseType: 'blob' });
+    const name = filenameFrom(res.headers['content-disposition'] as string | undefined, `portfolio.${format}`);
+    const url = URL.createObjectURL(res.data);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  },
 };
 
 export const contactApi = {
@@ -47,8 +82,13 @@ export const statsApi = {
   daily: (days = 30) => api.get<{ date: string; count: number }[]>(`/stats/daily?days=${days}`).then(r => r.data),
 };
 
+type LoginResponse = AdminUser & { access_token: string };
+
 export const authApi = {
-  login: (password: string) => api.post<{ access_token: string }>('/auth/login', { password }).then(r => r.data),
+  config: () => api.get<AuthConfig>('/auth/config').then(r => r.data),
+  google: (credential: string) => api.post<LoginResponse>('/auth/google', { credential }).then(r => r.data),
+  login: (password: string) => api.post<LoginResponse>('/auth/login', { password }).then(r => r.data),
+  me: () => api.get<AdminUser>('/auth/me').then(r => r.data),
 };
 
 export const profileApi = {

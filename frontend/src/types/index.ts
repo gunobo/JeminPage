@@ -9,7 +9,40 @@ export interface Project {
   is_featured: boolean;
   category?: string;
   created_at: string;
+  // 케이스 스터디 (F1)
+  period?: string | null;
+  team?: string | null;
+  role?: string | null;
+  problem?: string | null;
+  troubleshooting?: string | null;
+  results?: string[] | null;
+  sort_order?: number | null;
 }
+
+export interface Award {
+  id: number;
+  title: string;
+  competition: string;
+  organizer: string | null;
+  awarded_date: string | null;
+  project_id: number | null;
+  description: string | null;
+  link_url: string | null;
+  sort_order: number | null;
+}
+
+export interface AdminUser {
+  email: string;
+  name: string;
+  picture: string;
+}
+
+export interface AuthConfig {
+  google_client_id: string;
+  password_login: boolean;
+}
+
+export type ExportFormat = 'pdf' | 'docx' | 'md';
 
 export interface ContactForm {
   name: string;
@@ -109,6 +142,7 @@ export interface Profile {
   discord: string;
   cv_url: string;
   og_image_url: string;
+  cv_mode: 'generated' | 'upload';
   skill_groups: SkillGroup[];
   yearly_goals: YearlyGoal[];
   marquee_items: string[];

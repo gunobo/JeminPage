@@ -15,3 +15,12 @@ class Project(Base):
     is_featured = Column(Boolean, default=False)
     category = Column(String(100), nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # ── 케이스 스터디 (F1) ──
+    period = Column(String(100), nullable=True)
+    team = Column(String(200), nullable=True)
+    role = Column(String(200), nullable=True)
+    problem = Column(Text, nullable=True)
+    troubleshooting = Column(Text, nullable=True)  # "## 제목" 으로 항목 구분
+    results = Column(JSON, nullable=True)  # ["성과 1", "성과 2"]
+    sort_order = Column(Integer, nullable=True)

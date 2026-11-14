@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <title>{{ p.name or '포트폴리오' }} — 포트폴리오</title>
+  <style>
+    @font-face { font-family: "Pretendard"; font-weight: 400; src: url("{{ font_dir }}/Pretendard-Regular.otf"); }
+    @font-face { font-family: "Pretendard"; font-weight: 600; src: url("{{ font_dir }}/Pretendard-SemiBold.otf"); }
+    @font-face { font-family: "Pretendard"; font-weight: 800; src: url("{{ font_dir }}/Pretendard-ExtraBold.otf"); }
+  </style>
+  <link rel="stylesheet" href="{{ css_url }}">
+</head>
+<body>
+  <header class="head">
+    <div class="head-text">
+      <h1>{{ p.name or '포트폴리오' }}</h1>
+      {% if p.tagline %}<p class="tagline">{{ p.tagline }}</p>{% endif %}
+      <p class="contacts">
+        {% for k, v in contacts %}<span><b>{{ k }}</b> {{ v }}</span>{% endfor %}
+      </p>
+    </div>
+    {% if avatar %}<img class="avatar" src="{{ avatar }}" alt="">{% endif %}
+  </header>
+
+  {% if p.bio %}
+  <section>
+    <h2>소개</h2>
+    <p class="pre">{{ p.bio.strip() }}</p>
+  </section>
+  {% endif %}
+
+  {% if d.skill_groups %}
+  <section>
+    <h2>기술 스택</h2>
+    <table class="skills">
+      {% for g in d.skill_groups %}
+      <tr><th>{{ g.category }}</th><td>{{ g.skills | join(', ') }}</td></tr>
+      {% endfor %}
+    </table>
+  </section>
+  {% endif %}
+
+  {% if d.projects %}
+  <section>
+    <h2>프로젝트</h2>
+    {% for pr in d.projects %}
+    <article class="project">
+      <h3>
+        {{ pr.title }}
+        {% for a in pr.awards %}<span class="badge">{{ a }}</span>{% endfor %}
+      </h3>
+      {% if pr.meta %}<p class="meta">{{ pr.meta | join(' · ') }}</p>{% endif %}
+      {% if pr.tech_stack %}<p class="stack">{% for t in pr.tech_stack %}<span>{{ t }}</span>{% endfor %}</p>{% endif %}
+      {% if pr.description %}<p class="pre">{{ pr.description }}</p>{% endif %}
+      {% if pr.problem %}
+      <div class="block"><h4>문제</h4><p class="pre">{{ pr.problem }}</p></div>
+      {% endif %}
+      {% if pr.troubleshooting %}
+      <div class="block"><h4>트러블슈팅 — {{ pr.troubleshooting.title }}</h4><p class="pre">{{ pr.troubleshooting.body }}</p></div>
+      {% endif %}
+      {% if pr.results %}
+      <div class="block"><h4>성과</h4><ul>{% for r in pr.results %}<li>{{ r }}</li>{% endfor %}</ul></div>
+      {% endif %}
+      {% if pr.links %}
+      <p class="links">{% for k, v in pr.links %}<span><b>{{ k }}</b> {{ v }}</span>{% endfor %}</p>
+      {% endif %}
+    </article>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  {% if d.awards %}
+  <section class="keep">
+    <h2>수상</h2>
+    <table class="rows">
+      {% for a in d.awards %}
+      <tr>
+        <td class="date">{{ a.date }}</td>
+        <td><b>{{ a.title }}</b> · {{ a.competition }}{% if a.organizer %} <span class="muted">({{ a.organizer }})</span>{% endif %}
+          {% if a.project %}<span class="muted"> — {{ a.project }}</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+  {% endif %}
+
+  {% if d.orgs %}
+  <section class="keep">
+    <h2>활동</h2>
+    <table class="rows">
+      {% for o in d.orgs %}
+      <tr>
+        <td class="date">{{ o.period }}</td>
+        <td><b>{{ o.name }}</b>{% if o.role %} · {{ o.role }}{% endif %}{% if o.institution %} <span class="muted">— {{ o.institution }}</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+  {% endif %}
+
+  {% if d.certs %}
+  <section class="keep">
+    <h2>자격증</h2>
+    <table class="rows">
+      {% for c in d.certs %}
+      <tr>
+        <td class="date">{{ fmt_date(c.acquired_date) }}</td>
+        <td><b>{{ c.name }}</b>{% if c.issuer %} <span class="muted">— {{ c.issuer }}</span>{% endif %}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </section>
+  {% endif %}
+
+  <footer>{{ d.generated.isoformat() }} · {{ d.site_host }}</footer>
+</body>
+</html>

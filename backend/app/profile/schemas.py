@@ -1,5 +1,5 @@
 from pydantic import BaseModel, field_validator
-from typing import Any, Union
+from typing import Any, Literal, Union
 
 class SkillItem(BaseModel):
     name: str
@@ -25,6 +25,7 @@ class ProfileOut(BaseModel):
     discord: str
     cv_url: str
     og_image_url: str
+    cv_mode: Literal["generated", "upload"] = "generated"
     skill_groups: list[SkillGroup] = []
     yearly_goals: list[YearlyGoal] = []
     marquee_items: list[str] = []
@@ -33,6 +34,11 @@ class ProfileOut(BaseModel):
     @classmethod
     def coerce_none_to_list(cls, v: Any) -> Any:
         return v if v is not None else []
+
+    @field_validator("cv_mode", mode="before")
+    @classmethod
+    def default_cv_mode(cls, v: Any) -> Any:
+        return v if v in ("generated", "upload") else "generated"
 
     model_config = {"from_attributes": True}
 
@@ -47,6 +53,7 @@ class ProfileUpdate(BaseModel):
     discord: str = ""
     cv_url: str = ""
     og_image_url: str = ""
+    cv_mode: Literal["generated", "upload"] = "generated"
     skill_groups: list[SkillGroup] = []
     yearly_goals: list[YearlyGoal] = []
     marquee_items: list[str] = []
