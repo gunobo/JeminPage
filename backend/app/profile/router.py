@@ -19,17 +19,9 @@ def _get_or_create(db: Session) -> Profile:
 
 @router.get("/og-meta", response_class=HTMLResponse, include_in_schema=False)
 def og_meta(db: Session = Depends(get_db)):
-    p = _get_or_create(db)
-    title = f"{p.name} — {p.tagline}" if p.name and p.tagline else (p.name or "imjemin")
-    desc = p.bio[:160] if p.bio else ""
-    image = p.og_image_url or "https://imjemin.co.kr/og-image.png"
-    return f"""<meta name="description" content="{desc}" />
-<meta property="og:title" content="{title}" />
-<meta property="og:description" content="{desc}" />
-<meta property="og:image" content="{image}" />
-<meta name="twitter:title" content="{title}" />
-<meta name="twitter:description" content="{desc}" />
-<meta name="twitter:image" content="{image}" />"""
+    # 구버전 index.html 호환용 — 이스케이프된 홈 메타를 그대로 반환 (F4: /api/meta/ssi)
+    from ..seo.router import render_head
+    return render_head(db, "/")
 
 @router.get("", response_model=ProfileOut)
 def get_profile(db: Session = Depends(get_db)):

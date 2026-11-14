@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { projectsApi, statsApi, profileApi, organizationsApi, certificationsApi } from '../api';
+import { projectsApi, statsApi, profileApi, organizationsApi, certificationsApi, awardsApi } from '../api';
+import DownloadMenu from '../components/ui/DownloadMenu';
 import { useScrollAnimation } from '../hooks/useScrollAnimation';
 import { useLang } from '../context/LanguageContext';
-import type { Project, VisitorStats, Profile, Organization, Certification } from '../types';
+import type { Project, VisitorStats, Profile, Organization, Certification, Award } from '../types';
 import { normalizeSkill } from '../types';
 
 function FadeUp({ children, delay = 0, className = '' }: { children: React.ReactNode; delay?: number; className?: string }) {
@@ -51,6 +52,34 @@ function Modal({ children, onClose }: { children: React.ReactNode; onClose: () =
       </div>
     </div>
   );
+}
+
+type TimelineItem = { key: string; sort: string; label: string; kind: 'Project' | 'Award' | 'Activity'; title: string; sub?: string; to?: string };
+
+/** "2026.03 ~ 2026.06", "2026-03-01", "2026.3" → "2026-03" (정렬용). 못 읽으면 '' */
+function toSortKey(text?: string | null): string {
+  const m = /(\d{4})\s*[.\-/년]\s*(\d{1,2})?/.exec(text || '');
+  if (!m) return '';
+  return `${m[1]}-${String(m[2] ?? '01').padStart(2, '0')}`;
+}
+
+function buildTimeline(projects: Project[], awards: Award[], orgs: Organization[]): TimelineItem[] {
+  const items: TimelineItem[] = [];
+  for (const p of projects) {
+    const sort = toSortKey(p.period) || p.created_at.slice(0, 7);
+    items.push({ key: `p${p.id}`, sort, label: p.period || sort.replace('-', '.'), kind: 'Project', title: p.title, sub: p.role || p.category || undefined, to: `/projects/${p.id}` });
+  }
+  for (const a of awards) {
+    const sort = toSortKey(a.awarded_date);
+    if (!sort) continue;
+    items.push({ key: `a${a.id}`, sort, label: sort.replace('-', '.'), kind: 'Award', title: `${a.title} · ${a.competition}`, sub: a.organizer || undefined, to: a.project_id ? `/projects/${a.project_id}` : undefined });
+  }
+  for (const o of orgs) {
+    const sort = toSortKey(o.period);
+    if (!sort) continue;
+    items.push({ key: `o${o.id}`, sort, label: o.period, kind: 'Activity', title: o.name, sub: o.role || undefined });
+  }
+  return items.sort((x, y) => y.sort.localeCompare(x.sort));
 }
 
 function GoalsSection({ goals }: { goals: import('../types').YearlyGoal[] }) {
@@ -126,7 +155,8 @@ export default function Home() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [orgs, setOrgs] = useState<Organization[]>([]);
   const [certs, setCerts] = useState<Certification[]>([]);
-  const { t } = useLang();
+  const [awards, setAwards] = useState<Award[]>([]);
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
   const [scrollY, setScrollY] = useState(0);
   const [count, setCount] = useState(0);
@@ -135,14 +165,13 @@ export default function Home() {
   // 모달 상태
   const [selectedSkillGroup, setSelectedSkillGroup] = useState<import('../types').SkillGroup | null>(null);
   const [selectedOrg, setSelectedOrg] = useState<Organization | null>(null);
-  // Process 확장
-  const [expandedProcess, setExpandedProcess] = useState<number | null>(null);
 
   useEffect(() => {
     profileApi.get().then(setProfile).catch(() => {});
     organizationsApi.list().then(setOrgs).catch(() => {});
     certificationsApi.list().then(setCerts).catch(() => {});
-    projectsApi.list().then(p => setFeatured(p.filter(x => x.is_featured).slice(0, 4)));
+    awardsApi.list().then(setAwards).catch(() => {});
+    projectsApi.list().then(p => { setAllProjects(p); setFeatured(p.filter(x => x.is_featured).slice(0, 4)); }).catch(() => {});
     if (!localStorage.getItem('visited')) {
       statsApi.visit();
       localStorage.setItem('visited', '1');
@@ -175,12 +204,8 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [stats]);
 
-  const processItems = [
-    { num: '01', title: 'Research', desc: t('researchDesc') },
-    { num: '02', title: 'Design', desc: t('designDesc') },
-    { num: '03', title: 'Develop', desc: t('developDesc') },
-    { num: '04', title: 'Deploy', desc: t('deployDesc') },
-  ];
+  const timeline = buildTimeline(allProjects, awards, orgs);
+  const uploadedCv = profile?.cv_mode === 'upload' && profile.cv_url ? profile.cv_url : undefined;
 
   return (
     <main className="bg-[#0a0a0a] text-white overflow-x-hidden">
@@ -235,10 +260,7 @@ export default function Home() {
                 className="group flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white border border-white/20 px-7 py-4 hover:bg-white hover:text-black transition-all duration-300">
                 Projects <span className="group-hover:translate-x-1 transition-transform">→</span>
               </Link>
-              {profile?.cv_url && (
-                <a href={profile.cv_url} download target="_blank" rel="noreferrer"
-                  className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors">CV ↓</a>
-              )}
+              <DownloadMenu uploadedCvUrl={uploadedCv} align="left" label="Portfolio" />
               <Link to="/contact"
                 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors">Contact</Link>
             </div>
@@ -412,6 +434,42 @@ export default function Home() {
         </section>
       )}
 
+      {/* ── AWARDS ── */}
+      {awards.length > 0 && (
+        <section className="border-t border-white/10 px-6 md:px-16 py-20 md:py-40 max-w-7xl mx-auto">
+          <FadeUp>
+            <div className="mb-16">
+              <span className="text-[11px] font-semibold tracking-[0.3em] text-white/30 uppercase">Recognition</span>
+              <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2">Awards</h2>
+            </div>
+          </FadeUp>
+          <div className="space-y-px bg-white/5">
+            {awards.map((a, i) => {
+              const inner = (
+                <>
+                  <span className="text-[11px] font-semibold tracking-widest text-white/30 shrink-0 w-24">
+                    {a.awarded_date ? a.awarded_date.slice(0, 7).replace('-', '.') : '—'}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-black text-lg md:text-xl tracking-tight text-white/80 group-hover:text-white transition-colors break-keep">{a.title}</h3>
+                    <p className="text-sm text-white/40 mt-1 break-keep">{a.competition}{a.organizer && <span className="text-white/25"> · {a.organizer}</span>}</p>
+                  </div>
+                  {a.project_id && <span className="text-white/20 group-hover:text-white/60 transition-colors shrink-0">→</span>}
+                </>
+              );
+              const cls = 'group bg-[#0a0a0a] flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-8 px-8 py-7 transition-colors';
+              return (
+                <FadeUp key={a.id} delay={i * 0.06}>
+                  {a.project_id
+                    ? <Link to={`/projects/${a.project_id}`} className={`${cls} hover:bg-white/[0.04]`}>{inner}</Link>
+                    : <div className={cls}>{inner}</div>}
+                </FadeUp>
+              );
+            })}
+          </div>
+        </section>
+      )}
+
       {/* ── ORGANIZATIONS ── */}
       {orgs.length > 0 && (
         <section className="border-t border-white/10 px-6 md:px-16 py-20 md:py-40 max-w-7xl mx-auto">
@@ -502,43 +560,35 @@ export default function Home() {
         </section>
       )}
 
-      {/* ── PROCESS ── */}
-      <section className="border-t border-white/10 px-6 md:px-16 py-20 md:py-40 max-w-7xl mx-auto">
-        <FadeUp>
-          <span className="text-[11px] font-semibold tracking-[0.3em] text-white/30 uppercase">How I Work</span>
-          <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2 mb-20">Process</h2>
-        </FadeUp>
-        <div className="space-y-px bg-white/5">
-          {processItems.map(({ num, title, desc }, i) => {
-            const isOpen = expandedProcess === i;
-            return (
-              <SlideIn key={num} from="left" delay={i * 0.1}>
-                <div
-                  className="group bg-[#0a0a0a] hover:bg-white/[0.02] transition-colors cursor-pointer"
-                  onClick={() => setExpandedProcess(isOpen ? null : i)}
-                >
-                  <div className="flex items-center gap-4 md:gap-12 p-6 md:p-10">
-                    <span className="font-black text-3xl md:text-5xl text-white/10 group-hover:text-white/30 transition-colors shrink-0 w-10 md:w-16">{num}</span>
-                    <div className="flex-1 flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-3">
-                      <h3 className="font-black text-xl md:text-3xl tracking-tight group-hover:text-white transition-colors">{title}</h3>
-                      {!isOpen && <p className="text-white/40 text-sm max-w-sm hidden md:block">{desc}</p>}
-                    </div>
-                    <span
-                      className="text-white/30 group-hover:text-white transition-all duration-300 text-lg shrink-0"
-                      style={{ transform: isOpen ? 'rotate(90deg)' : 'rotate(0deg)' }}
-                    >→</span>
-                  </div>
-                  {isOpen && (
-                    <div className="px-6 md:px-10 pb-6 md:pb-10 pl-[calc(2.5rem+1rem)] md:pl-[calc(4rem+3rem)]">
-                      <p className="text-white/60 text-sm md:text-base leading-relaxed border-l border-white/10 pl-4 md:pl-6">{desc}</p>
-                    </div>
-                  )}
-                </div>
-              </SlideIn>
-            );
-          })}
-        </div>
-      </section>
+      {/* ── TIMELINE (구 Process) ── */}
+      {timeline.length > 0 && (
+        <section className="border-t border-white/10 px-6 md:px-16 py-20 md:py-40 max-w-7xl mx-auto">
+          <FadeUp>
+            <span className="text-[11px] font-semibold tracking-[0.3em] text-white/30 uppercase">Journey</span>
+            <h2 className="font-black text-5xl md:text-7xl tracking-tighter mt-2 mb-20">Timeline</h2>
+          </FadeUp>
+          <ol className="relative border-l border-white/10 ml-2 md:ml-40 space-y-10">
+            {timeline.map((item, i) => {
+              const body = (
+                <>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-white/25 mb-1">{item.kind}</p>
+                  <h3 className="font-black text-lg md:text-2xl tracking-tight text-white/80 group-hover:text-white transition-colors break-keep">{item.title}</h3>
+                  {item.sub && <p className="text-sm text-white/40 mt-1">{item.sub}</p>}
+                </>
+              );
+              return (
+                <SlideIn key={item.key} from="left" delay={Math.min(i, 6) * 0.05}>
+                  <li className="relative pl-8 md:pl-12">
+                    <span className={`absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full ring-4 ring-[#0a0a0a] ${item.kind === 'Award' ? 'bg-amber-300/80' : 'bg-white/40'}`} />
+                    <span className="block md:absolute md:-left-40 md:w-32 md:text-right text-[11px] font-semibold tracking-widest text-white/30 mb-1 md:mb-0 md:top-1.5">{item.label}</span>
+                    {item.to ? <Link to={item.to} className="group block">{body}</Link> : <div className="group">{body}</div>}
+                  </li>
+                </SlideIn>
+              );
+            })}
+          </ol>
+        </section>
+      )}
 
       {/* ── GOALS ── */}
       {profile?.yearly_goals && profile.yearly_goals.length > 0 && (

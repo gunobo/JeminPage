@@ -15,6 +15,8 @@ class Profile(Base):
     discord = Column(String(200), default="")
     cv_url = Column(String(500), default="")
     og_image_url = Column(String(500), default="")
+    # "generated" = 자동 생성 PDF, "upload" = 직접 올린 cv_url
+    cv_mode = Column(String(20), default="generated", nullable=True)
     # [{"category": "Backend", "skills": ["Python", "FastAPI"]}]
     skill_groups = Column(JSON, default=list)
     yearly_goals = Column(JSON, default=list)

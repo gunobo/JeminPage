@@ -3,12 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IMJEMIN</title>
-    <!--# include virtual="/api/profile/og-meta" -->
+    <!-- F4: nginx SSI가 경로별 title·description·canonical·og:*·twitter:*(+홈 JSON-LD)를 채운다.
+         백엔드가 응답하지 않으면 아래 블록(stub)이 대신 출력된다. 개발 서버(vite)에서는 블록 안 title만 보인다. -->
+    <!--# block name="meta_fallback" --><title>IMJEMIN</title>
+    <meta property="og:url" content="https://imjemin.co.kr" /><!--# endblock -->
+    <!--# include virtual="/__meta" stub="meta_fallback" -->
 
-    <!-- OG / Social (static fallbacks) -->
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://imjemin.co.kr" />
+    <!-- OG / Social (static) -->
     <meta property="og:locale" content="ko_KR" />
     <meta property="og:site_name" content="imjemin" />
     <meta name="twitter:card" content="summary_large_image" />
