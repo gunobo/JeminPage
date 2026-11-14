@@ -40,7 +40,7 @@ def test_migrate_stamps_legacy_db(tmp_path):
     with eng.connect() as c:
         assert c.execute(text("SELECT title FROM projects WHERE id=1")).scalar() == "기존"
         assert c.execute(text("SELECT cv_mode FROM profile WHERE id=1")).scalar() == "upload"
-        assert c.execute(text("SELECT version_num FROM alembic_version")).scalar() == "0002_case_study_awards"
+        assert c.execute(text("SELECT version_num FROM alembic_version")).scalar() == "0003_profile_education"
 
 
 # ─── F1 ──────────────────────────────────────────────────────────────────────
@@ -275,6 +275,52 @@ def test_export_pdf_blocks_external_urls(migrated):
     for bad in ("http://169.254.169.254/latest/meta-data", "file:///etc/passwd", "https://example.com/x.png"):
         with pytest.raises(ValueError):
             _safe_url_fetcher(bad)
+
+
+def test_resume_export(client, auth):
+    pytest.importorskip("weasyprint")
+    # 앞선 테스트가 남긴 프로젝트를 지우고 실제 규모(프로젝트 1~3개)로 1장 여부를 본다
+    for pr in client.get("/api/projects").json():
+        client.delete(f"/api/projects/{pr['id']}", headers=auth)
+    _seed_portfolio(client, auth)
+    prof = client.get("/api/profile").json()
+    prof["education"] = [{"school": "부산소프트웨어마이스터고", "major": "소프트웨어개발과", "period": "2025.03 ~", "status": "재학"}]
+    assert client.put("/api/profile", json=prof, headers=auth).status_code == 200
+    assert client.get("/api/profile").json()["education"][0]["status"] == "재학"
+
+    md = client.get("/api/export/portfolio", params={"format": "md", "doc": "resume"}, headers=auth)
+    assert md.status_code == 200
+    assert "imjemin_resume.md" in md.headers["content-disposition"]
+    assert "%EC%9D%B4%EB%A0%A5%EC%84%9C" in md.headers["content-disposition"]  # "이력서"
+    text_md = md.content.decode()
+    for s in ("## 학력", "부산소프트웨어마이스터고", "## 프로젝트", "급식 알리미", "성과: 전교생 300명 사용", "## 수상", "## 자격증"):
+        assert s in text_md, s
+    assert "메모리 부족" not in text_md  # 이력서엔 트러블슈팅 없음
+
+    pdf = client.get("/api/export/portfolio", params={"format": "pdf", "doc": "resume"}, headers=auth)
+    assert pdf.status_code == 200 and pdf.content[:5] == b"%PDF-"
+    from pypdf import PdfReader
+    reader = PdfReader(io.BytesIO(pdf.content))
+    assert len(reader.pages) == 1
+    assert "부산소프트웨어마이스터고" in reader.pages[0].extract_text()
+
+    docx = client.get("/api/export/portfolio", params={"format": "docx", "doc": "resume"}, headers=auth)
+    from docx import Document
+    assert "부산소프트웨어마이스터고" in "\n".join(p.text for p in Document(io.BytesIO(docx.content)).paragraphs)
+
+    # 포트폴리오와 캐시가 섞이지 않음
+    port = client.get("/api/export/portfolio", params={"format": "md"}, headers=auth).content.decode()
+    assert "## 학력" not in port and "메모리 부족" in port
+
+
+def test_resume_requires_admin(client):
+    assert client.get("/api/export/portfolio", params={"format": "pdf", "doc": "resume"}).status_code == 401
+
+
+def test_education_validation(client, auth):
+    prof = client.get("/api/profile").json()
+    prof["education"] = [{"school": "x" * 201}]
+    assert client.put("/api/profile", json=prof, headers=auth).status_code == 422
 
 
 def test_export_requires_admin(client):

@@ -14,6 +14,7 @@ from ..config import settings
 from ..auth.utils import require_auth
 from ..database import get_db
 from ..profile.models import Profile
+from .resume import RESUME_RENDERERS
 from .service import MEDIA_TYPES, RENDERERS, collect
 
 router = APIRouter(prefix="/export", tags=["export"])
@@ -46,10 +47,17 @@ def _cache_set(key: str, body: bytes) -> None:
         pass
 
 
-def _disposition(name: str, fmt: str) -> str:
+DOCS = {
+    "portfolio": ("포트폴리오", "portfolio", RENDERERS),
+    "resume": ("이력서", "resume", RESUME_RENDERERS),
+}
+
+
+def _disposition(name: str, fmt: str, doc: str) -> str:
     today = date.today().strftime("%Y%m%d")
-    utf8 = f"{name}_포트폴리오_{today}.{fmt}"
-    return f"attachment; filename=\"imjemin_portfolio.{fmt}\"; filename*=UTF-8''{quote(utf8, safe='')}"
+    ko, en, _ = DOCS[doc]
+    utf8 = f"{name}_{ko}_{today}.{fmt}"
+    return f"attachment; filename=\"imjemin_{en}.{fmt}\"; filename*=UTF-8''{quote(utf8, safe='')}"
 
 
 # 관리자 전용 — 인증을 먼저 확인하고, 그다음 요청 횟수를 센다
@@ -57,17 +65,18 @@ def _disposition(name: str, fmt: str) -> str:
 async def export_portfolio(
     format: Literal["pdf", "docx", "md"] = Query("pdf"),
     scope: Literal["featured", "all"] = Query("featured"),
+    doc: Literal["portfolio", "resume"] = Query("portfolio"),
     db: Session = Depends(get_db),
 ):
-    key = f"export:{format}:{scope}:{data_version.current()}"
+    key = f"export:{doc}:{format}:{scope}:{data_version.current()}"
     body = _cache_get(key)
 
     if body is None:
         data = collect(db, scope)
         try:
-            body = await run_in_threadpool(RENDERERS[format], data)
+            body = await run_in_threadpool(DOCS[doc][2][format], data)
         except Exception as e:
-            log.exception("portfolio export failed (format=%s)", format)
+            log.exception("export failed (doc=%s, format=%s)", doc, format)
             raise HTTPException(status_code=500, detail="문서 생성에 실패했습니다") from e
         _cache_set(key, body)
 
@@ -77,7 +86,7 @@ async def export_portfolio(
         content=body,
         media_type=MEDIA_TYPES[format],
         headers={
-            "Content-Disposition": _disposition(name, format),
+            "Content-Disposition": _disposition(name, format, doc),
             "Cache-Control": "no-store",
             "X-Content-Type-Options": "nosniff",
         },

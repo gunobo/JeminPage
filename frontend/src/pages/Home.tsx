@@ -204,7 +204,6 @@ export default function Home() {
   }, [stats]);
 
   const timeline = buildTimeline(allProjects, awards, orgs);
-  const uploadedCv = profile?.cv_mode === 'upload' && profile.cv_url ? profile.cv_url : undefined;
 
   return (
     <main className="bg-[#0a0a0a] text-white overflow-x-hidden">
@@ -259,10 +258,6 @@ export default function Home() {
                 className="group flex items-center gap-3 text-xs font-black uppercase tracking-[0.2em] text-white border border-white/20 px-7 py-4 hover:bg-white hover:text-black transition-all duration-300">
                 Projects <span className="group-hover:translate-x-1 transition-transform">→</span>
               </Link>
-              {uploadedCv && (
-                <a href={uploadedCv} download target="_blank" rel="noreferrer"
-                  className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors">CV ↓</a>
-              )}
               <Link to="/contact"
                 className="text-xs font-semibold uppercase tracking-[0.2em] text-white/40 hover:text-white transition-colors">Contact</Link>
             </div>

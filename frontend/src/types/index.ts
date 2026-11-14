@@ -43,6 +43,14 @@ export interface AuthConfig {
 }
 
 export type ExportFormat = 'pdf' | 'docx' | 'md';
+export type ExportDoc = 'portfolio' | 'resume';
+
+export interface EducationItem {
+  school: string;
+  major: string;
+  period: string;
+  status: string;
+}
 
 export interface ContactForm {
   name: string;
@@ -146,4 +154,5 @@ export interface Profile {
   skill_groups: SkillGroup[];
   yearly_goals: YearlyGoal[];
   marquee_items: string[];
+  education: EducationItem[];
 }

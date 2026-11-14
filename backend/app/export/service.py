@@ -93,6 +93,9 @@ def collect(db: Session, scope: str) -> PortfolioData:
             "id": p.id,
             "title": p.title,
             "meta": [v for v in (p.period, p.team, p.role) if v],
+            "period": p.period or "",
+            "team": p.team or "",
+            "role": p.role or "",
             "description": (p.description or "").strip(),
             "problem": (p.problem or "").strip(),
             "troubleshooting": ts[0] if ts else None,  # 대표 1개

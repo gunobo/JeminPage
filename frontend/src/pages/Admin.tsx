@@ -402,7 +402,7 @@ function MessagesTab() {
 
 const EMPTY_PROFILE: Profile = {
   name: '', tagline: '', bio: '', github_url: '', email: '',
-  portfolio_url: '', avatar_url: '', discord: '', cv_url: '', og_image_url: '', cv_mode: 'generated', skill_groups: [], yearly_goals: [], marquee_items: [],
+  portfolio_url: '', avatar_url: '', discord: '', cv_url: '', og_image_url: '', cv_mode: 'generated', skill_groups: [], yearly_goals: [], marquee_items: [], education: [],
 };
 
 function ProfileTab() {
@@ -473,19 +473,7 @@ function ProfileTab() {
       <div className="border border-white/10 p-8 space-y-8">
         <div>
           <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase mb-2">CV / Resume</p>
-          <p className="text-xs text-white/20 mb-4">업로드한 CV PDF를 홈 화면 "CV ↓" 버튼으로 방문자에게 공개할지 고릅니다. 자동 생성 문서(PDF·Word·Markdown)는 관리자 상단의 Download 메뉴에서만 받을 수 있습니다.</p>
-          <div className="flex gap-2 mb-4">
-            {([['generated', '홈에 표시 안 함'], ['upload', '홈에 CV 버튼 표시']] as const).map(([mode, label]) => (
-              <button key={mode} type="button" onClick={() => setForm({ ...form, cv_mode: mode })}
-                className={`px-4 py-2 text-xs font-semibold uppercase tracking-widest border transition-colors ${
-                  form.cv_mode === mode ? 'border-white text-white' : 'border-white/10 text-white/30 hover:text-white/60'}`}>
-                {label}
-              </button>
-            ))}
-          </div>
-          {form.cv_mode === 'upload' && !form.cv_url && (
-            <p className="text-xs text-amber-300/70 mb-3">CV PDF를 올려야 홈에 버튼이 나타납니다.</p>
-          )}
+          <p className="text-xs text-white/20 mb-4">직접 만든 CV PDF를 보관합니다. 홈 화면에는 표시되지 않습니다. 자동 생성 포트폴리오·이력서는 상단의 Portfolio / Resume 메뉴에서 받을 수 있습니다.</p>
           <FileUpload
             value={form.cv_url}
             accept="application/pdf"
@@ -550,6 +538,42 @@ function ProfileTab() {
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Education (이력서용) */}
+      <div className="border border-white/10 p-8">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <p className="text-[11px] font-semibold tracking-[0.3em] text-white/20 uppercase">학력</p>
+            <p className="text-xs text-white/20 mt-1">이력서(Resume) 다운로드에만 들어갑니다. 홈 화면에는 표시되지 않습니다.</p>
+          </div>
+          <button type="button"
+            onClick={() => setForm({ ...form, education: [...(form.education || []), { school: '', major: '', period: '', status: '' }] })}
+            className={btnSecondary}>+ 추가</button>
+        </div>
+        {(!form.education || form.education.length === 0) && (
+          <p className="text-xs text-white/20 text-center py-6 uppercase tracking-widest">학력이 없습니다.</p>
+        )}
+        <div className="space-y-3">
+          {(form.education || []).map((e, i) => {
+            const set = (patch: Partial<typeof e>) =>
+              setForm({ ...form, education: form.education.map((x, idx) => idx === i ? { ...x, ...patch } : x) });
+            return (
+              <div key={i} className="grid grid-cols-1 sm:grid-cols-[2fr_2fr_1.3fr_1fr_auto] gap-2">
+                <input required value={e.school} maxLength={200} onChange={ev => set({ school: ev.target.value })}
+                  placeholder="학교 (부산소프트웨어마이스터고)" className={inputCls} />
+                <input value={e.major} maxLength={200} onChange={ev => set({ major: ev.target.value })}
+                  placeholder="학과 (소프트웨어개발과)" className={inputCls} />
+                <input value={e.period} maxLength={100} onChange={ev => set({ period: ev.target.value })}
+                  placeholder="기간 (2025.03 ~)" className={inputCls} />
+                <input value={e.status} maxLength={50} onChange={ev => set({ status: ev.target.value })}
+                  placeholder="재학/졸업" className={inputCls} />
+                <button type="button" onClick={() => setForm({ ...form, education: form.education.filter((_, idx) => idx !== i) })}
+                  className="px-3 text-red-400/40 hover:text-red-400 transition-colors">×</button>
+              </div>
+            );
+          })}
         </div>
       </div>
 
@@ -1405,6 +1429,7 @@ export default function Admin() {
           </div>
           <div className="flex items-center gap-6 min-w-0">
             <DownloadMenu label="Portfolio" />
+            <DownloadMenu label="Resume" doc="resume" />
             {user && (
               <div className="flex items-center gap-3 min-w-0">
                 {user.picture

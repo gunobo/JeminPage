@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import { exportApi } from '../../api';
 import { toast } from '../../lib/toast';
-import type { ExportFormat } from '../../types';
+import type { ExportDoc, ExportFormat } from '../../types';
 
 interface Props {
   /** cv_mode === 'upload' 이고 cv_url이 있으면 PDF 항목은 업로드한 CV를 연다 */
   uploadedCvUrl?: string;
+  doc?: ExportDoc;
   className?: string;
   align?: 'left' | 'right';
   label?: string;
@@ -35,7 +36,7 @@ async function errorMessage(err: unknown): Promise<string> {
   return '다운로드에 실패했어요.';
 }
 
-export default function DownloadMenu({ uploadedCvUrl, className = '', align = 'right', label = 'Download' }: Props) {
+export default function DownloadMenu({ uploadedCvUrl, doc = 'portfolio', className = '', align = 'right', label = 'Download' }: Props) {
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState<ExportFormat | null>(null);
   const ref = useRef<HTMLDivElement>(null);
@@ -58,7 +59,7 @@ export default function DownloadMenu({ uploadedCvUrl, className = '', align = 'r
     }
     setBusy(format);
     try {
-      await exportApi.download(format);
+      await exportApi.download(format, doc);
       setOpen(false);
     } catch (err) {
       toast(await errorMessage(err), 'error');

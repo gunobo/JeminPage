@@ -1,4 +1,4 @@
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, Field, field_validator
 from typing import Any, Literal, Union
 
 class SkillItem(BaseModel):
@@ -13,6 +13,13 @@ class YearlyGoal(BaseModel):
     text: str
     done: bool = False
     year: int = 2026
+
+class EducationItem(BaseModel):
+    school: str = Field(max_length=200)
+    major: str = Field(default="", max_length=200)
+    period: str = Field(default="", max_length=100)
+    status: str = Field(default="", max_length=50)  # 재학 / 졸업 / 졸업예정 ...
+
 
 class ProfileOut(BaseModel):
     name: str
@@ -29,8 +36,9 @@ class ProfileOut(BaseModel):
     skill_groups: list[SkillGroup] = []
     yearly_goals: list[YearlyGoal] = []
     marquee_items: list[str] = []
+    education: list[EducationItem] = []
 
-    @field_validator("skill_groups", "yearly_goals", "marquee_items", mode="before")
+    @field_validator("skill_groups", "yearly_goals", "marquee_items", "education", mode="before")
     @classmethod
     def coerce_none_to_list(cls, v: Any) -> Any:
         return v if v is not None else []
@@ -57,3 +65,4 @@ class ProfileUpdate(BaseModel):
     skill_groups: list[SkillGroup] = []
     yearly_goals: list[YearlyGoal] = []
     marquee_items: list[str] = []
+    education: list[EducationItem] = Field(default=[], max_length=10)

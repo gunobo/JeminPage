@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Project, ContactForm, ContactMessage, VisitorStats, Profile, BlogPost, Organization, Certification, VelogPost, Award, AdminUser, AuthConfig, ExportFormat } from '../types';
+import type { Project, ContactForm, ContactMessage, VisitorStats, Profile, BlogPost, Organization, Certification, VelogPost, Award, AdminUser, AuthConfig, ExportFormat, ExportDoc } from '../types';
 
 const api = axios.create({
   baseURL: '/api',
@@ -52,9 +52,9 @@ function filenameFrom(disposition: string | undefined, fallback: string) {
 
 export const exportApi = {
   /** nginx가 X-Requested-From 없는 /api 요청을 막으므로 <a href> 대신 axios로 받아 저장한다 */
-  download: async (format: ExportFormat, scope: 'featured' | 'all' = 'featured') => {
-    const res = await api.get<Blob>('/export/portfolio', { params: { format, scope }, responseType: 'blob' });
-    const name = filenameFrom(res.headers['content-disposition'] as string | undefined, `portfolio.${format}`);
+  download: async (format: ExportFormat, doc: ExportDoc = 'portfolio', scope: 'featured' | 'all' = 'featured') => {
+    const res = await api.get<Blob>('/export/portfolio', { params: { format, scope, doc }, responseType: 'blob' });
+    const name = filenameFrom(res.headers['content-disposition'] as string | undefined, `${doc}.${format}`);
     const url = URL.createObjectURL(res.data);
     const a = document.createElement('a');
     a.href = url;
